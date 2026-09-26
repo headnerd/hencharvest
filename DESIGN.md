@@ -73,6 +73,18 @@ a perfectly-filed ticket that resolves nothing.
   **transferred to the Mines.** This is a worse ending than death and a funnier one, and it
   is the fail state we design toward.
 
+> **CORRECTED DURING THE BUILD** — see `game/src/engine/rules.ts`. This section originally
+> said *career* bottoms out and triggers a strike. That is wrong, and it broke the whole
+> game: correct filings raise career every week, so career never reached 0, no strike ever
+> fired, and the entire promotion arc was unreachable. The end-to-end test caught it.
+>
+> **Patience is the strike trigger. Career is not.** The correct filing raises career and
+> costs patience, because the thesis is that doing the job right does not help — he never
+> asked for the pit trap to work. So a correct career rises while your standing falls, and
+> the demotion is *his* decision rather than a performance review. Three supporting rules:
+> a strike resets **both** meters to 4; patience **drains 1 every other day** with no memo
+> attached; and at most **one strike per day** is taken.
+
 ### 3.3 The Chosen One is a recurring ticket, not a boss
 
 He has an open incident from six months ago. Status: In Progress. Assignee: you.

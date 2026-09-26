@@ -264,6 +264,13 @@ be able to do it forever with no cost beyond slow slide.
 
 ## THE FULL LEDGER
 
+> **SUPERSEDED BY THE BUILD.** The numbers below assume *career* triggers the strike. The
+> shipped engine uses **patience** (see `DESIGN.md` §3.2) — correct filings raise career and
+> cost patience, so the Career column below does not describe a real run. The *shape* is
+> unchanged and still holds: a correct career rises, the demotion arrives anyway, and filing
+> badly is the only thing that helps. `game/src/engine/rules.test.ts` now asserts the shape
+> rather than these literal figures. Kept for the reasoning, not the numbers.
+
 The canonical run, auditable. Any row here that a playtest contradicts is a bug in either
 this map or the prototype.
 

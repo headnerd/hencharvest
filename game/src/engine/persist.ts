@@ -16,6 +16,7 @@ export function newRun(seed = makeSeed()): RunState {
   return {
     seed,
     week: 1,
+    day: 0,
     sceneIndex: 0,
     meters: { patience: 7, career: 6, morale: 6 },
     title: "REGIONAL_MANAGER",
@@ -25,6 +26,7 @@ export function newRun(seed = makeSeed()): RunState {
     recoveryGate: 0,
     heroStreak: 0,
     unwinnableLastScene: false,
+    lastStrikeDay: -1,
     transcript: [],
   };
 }

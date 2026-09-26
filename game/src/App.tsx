@@ -1,15 +1,23 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Choice, RunState, Scene, Verdict } from "./engine/types";
-import { week1 } from "./content/week1";
-import { applyDeltas, applyRecovery, canMisfile, isRunOver, resolveStrikes } from "./engine/rules";
+import type { Choice, RunState, Verdict } from "./engine/types";
+import { BEATS, TOTAL_SCENES } from "./content";
+import {
+  applyDeltas,
+  applyRecovery,
+  canMisfile,
+  isRunOver,
+  resolveStrikes,
+  tickDay,
+} from "./engine/rules";
 import { newRun, loadRun, saveRun, clearRun, exportRun } from "./engine/persist";
+
 /**
- * The whole game loop. Reads a scene, shows it, takes a choice, applies the deltas,
- * prints the verdict, moves on.
+ * The whole game loop. Reads a beat, shows it, takes a choice, applies the deltas, prints
+ * the verdict, moves on.
  *
- * Design rule that constrains this file: the UI must never explain a recovery. No
- * toasts, no badges, no "promotion available". A title change is reported in the same
- * flat register as everything else. See DESIGN.md 7.3.
+ * Design rule that constrains this file: the UI must never explain a recovery. No toasts,
+ * no badges, no "promotion available". A title change is reported in the same flat
+ * register as everything else. See DESIGN.md 7.3, CONTENT.md 5d.
  */
 
 /** Verdict text is fixed copy, not templated — see CONTENT.md 5c. */
@@ -27,9 +35,6 @@ const TITLE_LABEL: Record<RunState["title"], string> = {
   MINES: "Mines",
 };
 
-const SCENES: Scene[] = week1.days.flatMap((d) => d.scenes);
-const HEADING = week1.days[0]?.heading ?? "";
-
 export default function App() {
   const [run, setRun] = useState<RunState>(() => loadRun() ?? newRun());
   // Set once a choice is made, so the resolution and verdict show before choices return.
@@ -39,6 +44,7 @@ export default function App() {
 
   const choose = useCallback((choice: Choice) => {
     setRun((prev) => {
+      const beat = BEATS[prev.sceneIndex];
       let next: RunState = { ...prev, meters: applyDeltas(prev.meters, choice.deltas ?? {}) };
 
       // The misfiling. Only fires when demoted — see canMisfile.
@@ -47,17 +53,25 @@ export default function App() {
       }
 
       // Hero-defeated streak: only correct Chosen One filings count.
-      if (choice.correct && SCENES[prev.sceneIndex]?.isChosenOne) {
+      if (choice.correct && beat?.scene.isChosenOne) {
         next = { ...next, heroStreak: next.heroStreak + 1 };
       }
 
-      return resolveStrikes(next);
+      return resolveStrikes(next, prev.day);
     });
     setPending(choice);
   }, []);
 
   const advance = useCallback(() => {
-    setRun((prev) => ({ ...prev, sceneIndex: prev.sceneIndex + 1 }));
+    setRun((prev) => {
+      const nextIndex = prev.sceneIndex + 1;
+      // Daily tick at the start of a day: patience drain, probation, gate, strikes.
+      const isDayStart = BEATS[nextIndex]?.isDayStart;
+      const ticked = isDayStart
+        ? tickDay({ ...prev, day: prev.day + 1, sceneIndex: nextIndex })
+        : { ...prev, sceneIndex: nextIndex };
+      return isDayStart ? resolveStrikes(ticked, prev.day + 1) : ticked;
+    });
     setPending(null);
   }, []);
 
@@ -69,12 +83,12 @@ export default function App() {
 
   /** Share the run as text. No backend — a run is a seed and a log. */
   const share = useCallback(() => {
-    const text = exportRun(run);
-    void navigator.clipboard?.writeText(text);
+    void navigator.clipboard?.writeText(exportRun(run));
   }, [run]);
 
-  const over = isRunOver(run);
-  const scene = SCENES[run.sceneIndex];
+  const atEnd = !BEATS[run.sceneIndex];
+  const over = isRunOver(run, atEnd);
+  const beat = BEATS[run.sceneIndex];
 
 
   if (over) {
@@ -104,17 +118,39 @@ export default function App() {
     );
   }
 
-  if (!scene) {
+  if (!beat) {
     return (
       <>
         <Meters run={run} />
         <div className="ending">
-          <p className="day-heading">WEEK 1 — CLOSED</p>
+          <p className="day-heading">FORM 7B — CLOSED</p>
           <div className="body">
             <p>
-              Tuesday's filings are closed. The queue is at four hundred and one. He will be back.
-              This is documented. This is always documented.
+              The Chosen One is no longer in the building. He is a filed incident, status
+              Closed, resolution Rescheduled, which is not the truth and is, per the manual,
+              permitted.
             </p>
+            <p>
+              Re: The chosen one — status of the filing cabinet
+            </p>
+            <p>
+              The filing cabinet has not been deprecated. The filing cabinet has been
+              reported as the thing at the bottom on three separate occasions by three
+              separate people. The filing cabinet is a filing cabinet.
+            </p>
+            <p>
+              Deprecation notices were available. None were issued. This is not a
+              coincidence and it is not an oversight. The requirement has been met.
+            </p>
+            <p>He will be back. This is documented. This is always documented.</p>
+          </div>
+          <div className="verdict">
+            Follow-up required: No. There is no follow-up. The trap is compliant.
+            <span className="reason">
+              The trap was compliant before you arrived. The trap remained compliant. No
+              party is responsible for the trap, the calendar, or the outcome, and no party is
+              available to be responsible. Filing closed.
+            </span>
           </div>
           <button className="continue" onClick={restart}>
             Begin again
@@ -124,13 +160,15 @@ export default function App() {
     );
   }
 
+  const scene = beat.scene;
+
   return (
     <>
       <Meters run={run} />
 
       {!pending && (
         <>
-          <p className="day-heading">{HEADING}</p>
+          <p className="day-heading">{beat.day.heading}</p>
           <h2 className="scene-title">{scene.title}</h2>
           <div className="body">
             {scene.body.map((line, i) => (
@@ -175,7 +213,11 @@ export default function App() {
       )}
 
       <p className="footer-note">
-        Run {run.seed} · <button className="link" onClick={share}>Copy run</button>
+        Run {run.seed} · Week {beat.week.week} of 6 · Beat {run.sceneIndex + 1} of{" "}
+        {TOTAL_SCENES} ·{" "}
+        <button className="link" onClick={share}>
+          Copy run
+        </button>
       </p>
     </>
   );

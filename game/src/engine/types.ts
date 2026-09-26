@@ -30,6 +30,8 @@ export interface RunState {
   seed: number;
   /** Which week of the run we are in, 1-indexed. */
   week: number;
+  /** Day counter within the run. Advances once per day and is the strike-guard key. */
+  day: number;
   /** Index into the week's scene list. */
   sceneIndex: number;
   meters: Meters;
@@ -45,6 +47,12 @@ export interface RunState {
   heroStreak: number;
   /** Whether an unwinnable ticket appeared in the previous scene. Pacing guard, 6.2. */
   unwinnableLastScene: boolean;
+  /**
+   * The day index on which the most recent strike was taken. Guards against taking
+   * several strikes on the same day while patience sits at 0 — without this, a single
+   * -4 memo took two demotions at once and ended the run by week 3.
+   */
+  lastStrikeDay: number;
   /** All text shown so far, so a run can be exported as a log. */
   transcript: TranscriptEntry[];
 }

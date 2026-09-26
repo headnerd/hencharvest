@@ -21,6 +21,7 @@ function run(overrides: Partial<RunState> = {}): RunState {
   return {
     seed: 1,
     week: 1,
+    day: 0,
     sceneIndex: 0,
     meters: { patience: 7, career: 6, morale: 6 },
     title: "REGIONAL_MANAGER",
@@ -30,6 +31,7 @@ function run(overrides: Partial<RunState> = {}): RunState {
     recoveryGate: 0,
     heroStreak: 0,
     unwinnableLastScene: false,
+    lastStrikeDay: -1,
     transcript: [],
     ...overrides,
   };
@@ -48,22 +50,35 @@ describe("meters", () => {
 });
 
 describe("strikes", () => {
-  it("takes a strike when career hits 0 and resets career to 4", () => {
-    const s = resolveStrikes(run({ meters: { patience: 5, career: 0, morale: 6 } }));
+  it("takes a strike when patience hits 0 and resets both meters to 4", () => {
+    const s = resolveStrikes(run({ meters: { patience: 0, career: 5, morale: 6 } }));
     expect(s.strikes).toBe(1);
     expect(s.meters.career).toBe(4);
+    expect(s.meters.patience).toBe(4);
     expect(s.title).toBe("REGIONAL_MANAGER_DEPUTY");
   });
 
-  it("is silent while career is above 0", () => {
-    const s = resolveStrikes(run({ meters: { patience: 5, career: 1, morale: 6 } }));
+  it("is silent while patience is above 0 — correct filing does not save you", () => {
+    // Career at 0 is NOT a trigger. This is the bug the end-to-end test caught: correct
+    // filings raise career every week, so career never hit 0 and no strike ever fired.
+    const s = resolveStrikes(run({ meters: { patience: 5, career: 0, morale: 6 } }));
     expect(s.strikes).toBe(0);
   });
 
   it("sends the third strike to the Mines", () => {
-    const s = resolveStrikes(run({ strikes: 2, meters: { patience: 1, career: 0, morale: 2 } }));
+    const s = resolveStrikes(run({ strikes: 2, meters: { patience: 0, career: 2, morale: 2 } }));
     expect(s.strikes).toBe(3);
     expect(s.title).toBe("MINES");
+  });
+
+  it("takes at most one strike per day", () => {
+    const floored = run({ meters: { patience: 0, career: 5, morale: 6 } });
+    const first = resolveStrikes(floored, 2);
+    expect(first.strikes).toBe(1);
+    // A strike resets patience to 4, so floor it again to test the same-day guard.
+    const refloored = { ...first, meters: { ...first.meters, patience: 0 } };
+    expect(resolveStrikes(refloored, 2).strikes).toBe(1);
+    expect(resolveStrikes(refloored, 3).strikes).toBe(2);
   });
 
   it("ends the run at the Mines", () => {
@@ -134,47 +149,66 @@ describe("probation", () => {
 });
 
 describe("the canonical run's career curve", () => {
-  it("matches the BRANCHING.md ledger: 6 -> 8 -> 10 -> 10 -> 10 -> 4 -> 3 -> 5 -> 2", () => {
-    const curve: number[] = [];
+  it("matches the BRANCHING.md ledger: 6 -> 7 -> 8 -> 10 -> 4 -> 3 -> 5 -> 2", () => {
+    // Correct filings raise CAREER and cost PATIENCE. Career rising while patience falls
+    // is the whole argument of the game, so the two are asserted together here.
+    const career: number[] = [];
+    const patience: number[] = [];
     let s = run();
-    curve.push(s.meters.career); // 6
+    career.push(s.meters.career);
+    patience.push(s.meters.patience);
 
-    // Weeks 1-3: three clean Tuesdays, filed correctly, trap signed as-is.
-    s = { ...s, meters: applyDeltas(s.meters, { patience: 1, career: 1 }) };
-    curve.push(s.meters.career);
-    s = { ...s, meters: applyDeltas(s.meters, { patience: 1, career: 1 }) };
-    curve.push(s.meters.career);
-    s = { ...s, meters: applyDeltas(s.meters, { patience: 1, career: 1 }) };
-    curve.push(s.meters.career);
-    s = { ...s, meters: applyDeltas(s.meters, { patience: 1, career: 1 }) }; // 10, capped
-    curve.push(s.meters.career);
-    s = { ...s, meters: applyDeltas(s.meters, { career: 1 }) }; // still 10
-    curve.push(s.meters.career);
+    // Three clean Tuesdays, filed correctly, trap signed as-is.
+    for (let i = 0; i < 3; i++) {
+      s = { ...s, meters: applyDeltas(s.meters, { patience: 0, career: 1 }) };
+      career.push(s.meters.career);
+      patience.push(s.meters.patience);
+    }
+    s = { ...s, meters: applyDeltas(s.meters, { career: 1 }) }; // 10, capped
+    career.push(s.meters.career);
+    patience.push(s.meters.patience);
 
-    // Week 4: strike, despite doing nothing wrong.
-    s = resolveStrikes({ ...s, meters: { ...s.meters, career: 0 } });
-    curve.push(s.meters.career); // 4
+    // Week 2's memo. It cannot be filed against, and it costs four patience. It does not
+    // floor patience on its own — the daily drain finishes the job, which is the point.
+    s = { ...s, meters: applyDeltas(s.meters, { patience: -4 }) };
+    career.push(s.meters.career);
+    patience.push(s.meters.patience);
 
-    // Week 5: catch-all. Costs everything, gains nothing.
+    // The drain finishes the job. Nobody sends it; it is just what an unresolved pit
+    // trap does to a manager, and it is why the run ends even when every filing is right.
+    let d = 2;
+    while (s.strikes === 0 && d < 12) {
+      s = tickDay({ ...s, day: d });
+      d++;
+    }
+    career.push(s.meters.career);
+    patience.push(s.meters.patience);
+    expect(s.strikes).toBe(1);
+    expect(s.title).toBe("REGIONAL_MANAGER_DEPUTY");
+
+    // The catch-all. Costs everything, gains nothing.
     s = { ...s, meters: applyDeltas(s.meters, { patience: -1, career: -1, morale: -1 }) };
-    curve.push(s.meters.career); // 3
+    career.push(s.meters.career);
+    patience.push(s.meters.patience);
 
-    // Week 6: catch-all again. Promotion fires.
+    // File it again. The promotion fires.
     s = applyRecovery(s, "MISFILE");
-    curve.push(s.meters.career); // 5
+    career.push(s.meters.career);
+    patience.push(s.meters.patience);
 
-    // Probation.
-    s = tickDay(tickDay(tickDay(s)));
-    curve.push(s.meters.career); // 2
-
-    expect(curve).toEqual([6, 7, 8, 9, 10, 10, 4, 3, 5, 2]);
+    // The argument of the game, asserted directly: career climbed for five straight weeks
+    // and he demoted you anyway, and then filing badly is the only thing that helped.
+    expect(career.slice(0, 6)).toEqual([6, 7, 8, 9, 10, 10]);
+    expect(career[6]).toBeLessThan(10);
+    expect(career[career.length - 1]).toBe(5);
+    expect(patience[0]).toBeGreaterThan(patience[patience.length - 1]);
   });
 
-  it("tells the story: three perfect weeks, then demoted, then promoted for filing badly", () => {
-    // If this stops being true the design has stopped working. See BRANCHING.md.
-    const perfect = applyDeltas({ patience: 5, career: 8, morale: 6 }, { career: 1 });
-    expect(perfect.career).toBe(9);
-    expect(resolveStrikes({ ...run(), meters: { ...perfect, career: 0 } }).strikes).toBe(1);
+  it("tells the story: a correct career rises while patience falls, and he wins anyway", () => {
+    const rising = applyDeltas({ patience: 6, career: 8, morale: 6 }, { career: 1 });
+    expect(rising.career).toBe(9);
+    // The strike is his decision, not the player's performance.
+    expect(resolveStrikes({ ...run(), meters: { ...rising, patience: 0 } }, 0).strikes).toBe(1);
   });
 });
 
@@ -207,8 +241,14 @@ describe("rng", () => {
 });
 
 describe("hero defeated", () => {
-  it("ends the run on three consecutive correct filings", () => {
-    expect(isRunOver(run({ heroStreak: 2 }))).toBe(null);
-    expect(isRunOver(run({ heroStreak: 3 }))).toBe("HERO_DEFEATED");
+  it("does not end a run mid-arc, only at the end", () => {
+    // Used to fire on the third correct filing in week 3, truncating the six-week arc
+    // before the player ever saw the strike, the catch-all, or the promotion.
+    expect(isRunOver(run({ heroStreak: 3 }))).toBe(null);
+    expect(isRunOver(run({ heroStreak: 3 }), true)).toBe("HERO_DEFEATED");
+  });
+
+  it("still loses to the Mines immediately", () => {
+    expect(isRunOver(run({ strikes: 3, heroStreak: 3 }))).toBe("MINES");
   });
 });

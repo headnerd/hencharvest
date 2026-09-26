@@ -25,13 +25,26 @@ const STRIKE_TITLES: Record<Exclude<Strikes, 0>, Title> = {
 };
 
 /**
- * Take a demotion strike if career has bottomed out.
+ * Take a demotion strike if patience has bottomed out.
+ *
+ * PATIENCE is the strike trigger, not career. This is the fix for a real bug the
+ * end-to-end test caught: correct filings were *raising* career every week, so career
+ * never hit 0, the strike never fired, and the whole promotion arc was unreachable.
+ *
+ * The deeper reason patience is the right trigger: the game's thesis is that doing the
+ * job right does not help. The Dark Lord never asked for the pit trap to work. So a
+ * correct filing must not restore his patience — see the deltas in src/content/*.ts.
+ * Career is a measure of how well you are doing; it gates promotions, it does not
+ * demote you. He decides that.
  *
  * Third strike is terminal. The Mines have no exit — that is the design, not a missing
  * feature. See DESIGN.md 7.5.
  */
-export function resolveStrikes(state: RunState): RunState {
-  if (state.meters.career > 0 || state.strikes >= 3) return state;
+export function resolveStrikes(state: RunState, day = 0): RunState {
+  if (state.meters.patience > 0 || state.strikes >= 3) return state;
+  // One strike per day. A big hit can floor patience across two scenes; without this the
+  // player took two demotions for one memo and the run ended by week 3.
+  if (state.lastStrikeDay === day) return state;
 
   const nextStrikes = (state.strikes + 1) as Strikes;
   const title = STRIKE_TITLES[nextStrikes as Exclude<Strikes, 0>];
@@ -41,8 +54,11 @@ export function resolveStrikes(state: RunState): RunState {
     strikes: nextStrikes,
     title,
     demoted: nextStrikes < 3,
-    // Career resets to 4, not 0. A demotion is a rung down, not a run over.
-    meters: { ...state.meters, career: 4 },
+    lastStrikeDay: day,
+    // Both meters reset on a demotion. Career to 4 because a demotion is a rung down,
+    // not a run over. Patience to 4 because he moves on — without this, patience sits at
+    // 0 and takes a second strike every single day, which ends the run by week 3.
+    meters: { ...state.meters, career: 4, patience: 4 },
   };
 }
 
@@ -94,15 +110,31 @@ export function applyRecovery(state: RunState, kind: RecoveryKind): RunState {
   };
 }
 
-/** Called once per day before scenes resolve. */
+/**
+ * Called once per day before scenes resolve.
+ *
+ * Patience drains by 1 every other day. Nobody sends that. It is simply what a fortress
+ * with an unresolved pit trap does to a manager, and it is why the run ends even when
+ * every filing is correct.
+ *
+ * The drain is deliberately gentle: the run is six weeks and there is a memo in week 2.
+ * A harsher drain floors patience before the player has filed the catch-all even once,
+ * and the promotion arc becomes unreachable. The memo, not the drain, is the big hit.
+ */
 export function tickDay(state: RunState): RunState {
   const next = { ...state };
   next.recoveryGate = Math.max(0, next.recoveryGate - 1);
+  if (next.day % 2 === 0) {
+    next.meters = {
+      ...next.meters,
+      patience: clamp(next.meters.patience - 1),
+    };
+  }
   if (next.probation > 0) {
     next.probation -= 1;
     next.meters = { ...next.meters, career: clamp(next.meters.career - 1) };
   }
-  return resolveStrikes(next);
+  return resolveStrikes(next, next.day);
 }
 
 /** The letterhead. 15% on a correctly-filed unwinnable ticket. */
@@ -115,9 +147,19 @@ export function advocacyEligible(state: RunState, quietDay: boolean): boolean {
   return quietDay && state.meters.morale >= 9 && state.recoveryGate === 0 && state.demoted;
 }
 
-/** Did the run just end? The Mines, or the hero actually stopped coming. */
-export function isRunOver(state: RunState): "MINES" | "HERO_DEFEATED" | null {
+/**
+ * Did the run just end?
+ *
+ * The Mines are terminal and end the run the moment the third strike lands.
+ *
+ * Hero-defeated only fires at the *end* of the run, not mid-arc. A player who files the
+ * Chosen One correctly three weeks running used to end the game in week 3 and never see
+ * the strike, the catch-all, or the promotion — the good-player path truncated the whole
+ * six-week arc. Now they play to the end, and the hero ending is the last thing that can
+ * happen to them. See BRANCHING.md "The two wins are mutually exclusive."
+ */
+export function isRunOver(state: RunState, atEndOfRun = false): "MINES" | "HERO_DEFEATED" | null {
   if (state.strikes >= 3) return "MINES";
-  if (state.heroStreak >= 3) return "HERO_DEFEATED";
+  if (atEndOfRun && state.heroStreak >= 3) return "HERO_DEFEATED";
   return null;
 }

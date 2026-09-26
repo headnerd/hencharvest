@@ -2,22 +2,19 @@
 
 *Middle Management At The Fortress*
 
-You are the regional manager under the Dark Lord. The chosen one keeps invading on Tuesdays
-and you have to write it up as a scheduling conflict.
-
 ## Running it
 
 ```bash
 cd game
 npm install
 npm run dev      # http://localhost:5173
-npm test         # 24 tests, incl. the BRANCHING.md ledger assertion
+npm test         # 36 tests
 npm run build    # -> dist/, static
 ```
 
 ## Deploying to Cloudflare Pages
 
-The build is a static SPA, so Pages needs no config file:
+Static SPA, no config file needed:
 
 | Setting | Value |
 | --- | --- |
@@ -25,54 +22,44 @@ The build is a static SPA, so Pages needs no config file:
 | Build output directory | `dist` |
 | Root directory | `game` |
 
-Connect the git repo, set those three values, deploy. No `wrangler` config, no Pages
-Functions, no Node runtime — the whole thing is a client-side state machine with the
-content compiled into the bundle.
-
-## Where things live
-
-Design documents are in the repo root and are the source of truth, not the code:
-
-- `../DESIGN.md` — systems, tone rules, the promotion ladder (§7)
-- `../CONTENT.md` — the writing, plus the two "never say this" reject lists
-- `../PROTOTYPE.md` — a playable Tuesday, written out branch by branch
-- `../BRANCHING.md` — the six-week canonical run, and the ledger
-
 ## Architecture
 
-**Content is data, not components.** The game is ~90% text and the text already exists in
-`CONTENT.md`, so every scene, choice, verdict, and memo lives in `src/content/*.ts` as typed
-data. Adding a Tuesday means writing a data file — never touching a `.tsx`.
+Content is data, not components. Every scene, choice, verdict, and memo is typed data in
+`src/content/week*.ts`. Adding a week means writing a data file, never touching a `.tsx`.
 
 ```
 src/
   engine/
-    types.ts     the schema. Everything in content is checked against this.
-    rules.ts     strikes, promotions, probation, the guards
-    rng.ts       seeded mulberry32, so every run replays identically
-    persist.ts   localStorage. No server, no account, nothing leaves the browser.
+    types.ts     the schema; all content is checked against it
+    rules.ts     strikes, promotions, probation, guards
+    rng.ts       seeded mulberry32 — every run replays identically
+    persist.ts   localStorage, no backend
   content/
-    week1.ts     week one, straight out of BRANCHING.md
+    week1..6.ts  the canonical run from BRANCHING.md
+    index.ts     flattens to a beat list
   App.tsx        the game loop and the UI
 ```
 
-**Two rules the code is not allowed to break:**
+## The rule that matters
 
-1. **The UI never explains a recovery.** No toasts, no badges, no "promotion available."
-   A title change is reported in the same flat register as everything else. `CONTENT.md` 5d
-   lists the ways to get this wrong.
-2. **`correct: true` is never rendered.** It exists for the test suite only. The player
-   learns correct filing from the verdicts, over several runs, which is what makes
-   *deliberately* misfiling an informed choice rather than a guess.
+**Patience is the strike trigger. Career is not.** Correct filings *raise* career and *cost*
+patience — the thesis being that doing the job right does not help. This was originally
+written the other way round and the end-to-end test caught that the promotion arc was
+completely unreachable. See `DESIGN.md` §3.2.
 
-## The one assertion worth knowing about
+## Tests
 
-`rules.test.ts` asserts the canonical Career curve from `BRANCHING.md`:
+36 tests, three files:
 
-```
-6 -> 7 -> 8 -> 9 -> 10 -> 10 -> 4 -> 3 -> 5 -> 2
-```
+- `engine/rules.test.ts` — the rules in isolation
+- `engine/simulation.test.ts` — **the whole six weeks played through the real content**, which
+  is the one that matters. It asserts a perfect player is demoted anyway, that the late
+  misfiler gets promoted, and that neither path truncates the arc.
+- `App.test.tsx` — render smoke test plus content invariants (never more than four choices,
+  never more than one correct, the catch-all is always last, the UI never shows `correct`).
 
-Three perfect weeks, a demotion anyway, then a promotion for filing badly. If a content
-edit breaks that curve, the test fails — because the curve *is* the argument.
+## Two rules the code cannot break
 
+1. **The UI never explains a recovery.** No toasts, badges, or "promotion available."
+2. **`correct: true` is never rendered.** Test-only. The player learns correct filing from
+   verdicts over several runs, which is what makes *deliberately* misfiling informed.

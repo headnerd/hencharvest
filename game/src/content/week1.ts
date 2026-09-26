@@ -53,7 +53,7 @@ export const week1: Week = {
               note: "He is here on a Tuesday. Tuesdays are a standing conflict.",
               correct: true,
               verdict: "ACCEPTED",
-              deltas: { patience: 1, career: 1 },
+              deltas: { patience: -1, career: 1 },
               resolution: [
                 "The notice went out. He received it. He is required to be notified of a conflict, and now he has been notified of a conflict, and the conflict is that he is here.",
                 "He is upset about the notice. He is not upset about the notice. He is upset that the notice worked — that he was, briefly, at 10:14, indisputably a scheduling problem rather than a man with a sword.",
