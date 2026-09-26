@@ -10,6 +10,7 @@ import {
   tickDay,
 } from "./rules";
 import { Rng } from "./rng";
+import { loadRun, newRun, saveRun } from "./persist";
 
 /**
  * BRANCHING.md is a spec, not a document. The canonical run's Career column
@@ -237,6 +238,61 @@ describe("rng", () => {
 
     const restored = Rng.restore(777, snap);
     expect([restored.next(), restored.next()]).toEqual(expected);
+  });
+});
+
+describe("persistence", () => {
+  // A week-one save lacks `day` and `lastStrikeDay`. Loading it made `day % 2 === 0` never
+  // true, which silently stopped the patience drain and softlocked the run: the player
+  // could never be demoted and the game was unfinishable. Validate rather than migrate.
+  const staleWeekOne = {
+    seed: 42,
+    week: 1,
+    sceneIndex: 3,
+    meters: { patience: 5, career: 6, morale: 6 },
+    title: "REGIONAL_MANAGER",
+    strikes: 0,
+    demoted: false,
+    probation: 0,
+    recoveryGate: 0,
+    heroStreak: 0,
+    unwinnableLastScene: false,
+    transcript: [],
+  };
+
+  it("rejects a save that predates the day counter", () => {
+    const store = new Map<string, string>();
+    globalThis.localStorage = {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => void store.set(k, v),
+      removeItem: (k: string) => void store.delete(k),
+      clear: () => store.clear(),
+      key: () => null,
+      length: 0,
+    } as Storage;
+
+    store.set("hencharvest.run.v2", JSON.stringify(staleWeekOne));
+    expect(loadRun()).toBeNull();
+  });
+
+  it("accepts a current save and round-trips it", () => {
+    const store = new Map<string, string>();
+    globalThis.localStorage = {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => void store.set(k, v),
+      removeItem: (k: string) => void store.delete(k),
+      clear: () => store.clear(),
+      key: () => null,
+      length: 0,
+    } as Storage;
+
+    const run = newRun(1234);
+    saveRun(run);
+    const loaded = loadRun();
+    expect(loaded).not.toBeNull();
+    expect(loaded?.day).toBe(0);
+    expect(loaded?.lastStrikeDay).toBe(-1);
+    expect(loaded?.meters).toEqual(run.meters);
   });
 });
 

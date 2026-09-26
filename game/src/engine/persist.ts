@@ -10,7 +10,37 @@ import { makeSeed } from "./rng";
  * that is cheap to replay.
  */
 
-const KEY = "hencharvest.run.v1";
+const KEY = "hencharvest.run.v2";
+
+/**
+ * A save is only usable if every field the engine reads is present and sane.
+ *
+ * This matters more than it looks. Run state gained `day` and `lastStrikeDay` during the
+ * build, and a week-one save from before that loads with `day: undefined` — which makes
+ * `day % 2 === 0` never true, so the patience drain silently stops and the player can
+ * never be demoted. A silent softlock is much worse than losing a save, so we validate
+ * rather than migrate. The runs are short and cheap to replay.
+ */
+function isUsable(parsed: unknown): parsed is RunState {
+  if (!parsed || typeof parsed !== "object") return false;
+  const s = parsed as Partial<RunState>;
+  return (
+    typeof s.seed === "number" &&
+    typeof s.day === "number" &&
+    typeof s.sceneIndex === "number" &&
+    typeof s.strikes === "number" &&
+    typeof s.lastStrikeDay === "number" &&
+    typeof s.probation === "number" &&
+    typeof s.recoveryGate === "number" &&
+    typeof s.heroStreak === "number" &&
+    typeof s.title === "string" &&
+    typeof s.meters === "object" &&
+    s.meters !== null &&
+    typeof s.meters.patience === "number" &&
+    typeof s.meters.career === "number" &&
+    typeof s.meters.morale === "number"
+  );
+}
 
 export function newRun(seed = makeSeed()): RunState {
   return {
@@ -43,9 +73,8 @@ export function loadRun(): RunState | null {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as RunState;
-    if (typeof parsed?.seed !== "number" || !parsed.meters) return null;
-    return parsed;
+    const parsed: unknown = JSON.parse(raw);
+    return isUsable(parsed) ? parsed : null;
   } catch {
     return null;
   }
