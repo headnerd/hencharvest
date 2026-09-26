@@ -1,0 +1,200 @@
+/*
+ * The fortress is a mid-size firm in a hell dimension. The UI must not be charming.
+ *
+ * Rules for anything visual, per CONTENT.md:
+ *   - no icons, no illustrations, no badges, no notification toasts
+ *   - the only UI is three numbers and a list of options
+ *   - deadpan lives in flat typography and generous whitespace
+ *   - a promotion must never look like a reward
+ */
+
+:root {
+  /* Muted, paper-adjacent. Nothing here should feel like a game. */
+  --paper: #f4f2ed;
+  --ink: #2b2a27;
+  --ink-soft: #6d6b64;
+  --rule: #d8d4ca;
+  --verdict: #4a4a45;
+
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color: var(--ink);
+  background: var(--paper);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  font-size: 15px;
+}
+
+#root {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 4rem 1.5rem 6rem;
+}
+
+/* --- the three numbers. This is the entire status UI. --- */
+
+.meters {
+  display: flex;
+  gap: 1.75rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 2.5rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  flex-wrap: wrap;
+}
+
+.meters strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.meters .title {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.day-heading {
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 1.75rem;
+}
+
+.scene-title {
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0 0 1.25rem;
+  font-weight: 600;
+}
+
+/* World lines. A blockquote because they are the building talking. */
+.body p {
+  margin: 0 0 1rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--rule);
+  color: var(--ink);
+}
+
+.resolution p {
+  margin: 0 0 0.85rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--rule);
+  color: var(--ink);
+}
+
+/* A verdict reads like a stamp on a form. Not a game notification. */
+.verdict {
+  margin: 1.5rem 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--rule);
+  font-size: 0.82rem;
+  color: var(--verdict);
+}
+
+.verdict .reason {
+  display: block;
+  margin-top: 0.4rem;
+  color: var(--ink-soft);
+}
+
+/* --- choices. Buttons styled as lines in a form, not as game buttons. --- */
+
+.choices {
+  margin-top: 2.25rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 1.25rem;
+}
+
+.choice {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  padding: 0.85rem 0.5rem;
+  margin: 0;
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.choice:hover,
+.choice:focus-visible {
+  background: #ece9e1;
+  outline: none;
+}
+
+.choice .label {
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.choice .note {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.continue {
+  margin-top: 2.25rem;
+  background: none;
+  border: 1px solid var(--rule);
+  padding: 0.6rem 1.4rem;
+  font: inherit;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+/* A link that reads as a form field, not a button. */
+.link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+
+.continue:hover,
+.continue:focus-visible {
+  color: var(--ink);
+  border-color: var(--ink-soft);
+  outline: none;
+}
+
+.ending {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+}
+
+.footer-note {
+  margin-top: 3rem;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+}
+
