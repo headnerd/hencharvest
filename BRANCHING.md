@@ -13,8 +13,8 @@ here, one of them is wrong and we want to know which.
 
 | Key | Meaning |
 | --- | --- |
-| **PAT** | Dark Lord's Patience, 0–10 |
-| **CAR** | Your Career Position, 0–10. Hits 0 = **strike**, reset to 4 |
+| **PAT** | Dark Lord's Patience, 0–10. **Hitting 0 is what takes a strike**, reset to 4 |
+| **CAR** | Your Career Position, 0–10. *Rises* with correct filings and never causes a strike. See `DESIGN.md` §3.2 |
 | **MOR** | Goblin Morale, 0–10. Intel *and* promotion currency |
 | **S** | Demotion strikes, 0–3. Third = the Mines, terminal |
 | **Title** | RM / RM(Deputy) / RM(Acting) / MINES |
@@ -41,6 +41,10 @@ correct behaviour, because it does nothing for them. They have to get worse befo
 anything. The trap resolves itself.
 
 **Consequence for the prototype:** the promotion fires on the *first* catch-all filed while
+demoted with MOR ≥ 2. It does not require three Tuesdays. The "three Tuesdays" framing in
+`PROTOTYPE.md` was discovery pacing — a player misfiling repeatedly at the top and getting
+nothing — and the real trigger is one deliberate wrong filing once demoted. Flagged for
+`PROTOTYPE.md` to reconcile.
 
 ---
 
@@ -91,10 +95,6 @@ points, and the player did nothing to earn the loss.
 > *Goblin 4:* You're at ten.
 > *You:* I know what I'm at.
 > *Goblin 4:* You keep saying that like it's a defence.
-
-demoted with MOR ≥ 2. It does not require three Tuesdays. The "three Tuesdays" framing in
-`PROTOTYPE.md` was discovery pacing — a player misfiling repeatedly at the top and getting
-nothing — and the real trigger is one deliberate wrong filing once demoted. Flagged for
 
 ---
 
@@ -188,6 +188,31 @@ or possibly by muscle memory, which is the same thing at week six.
 >
 > *There is no signature. There has never needed to be one. The letterhead is a courtesy.*
 
+> Your title has been updated. The effective date is today. No meeting has been scheduled
+> and none is required.
+>
+> The filing quality concern raised on the 14th is considered closed.
+
+**TITLE: Regional Manager** · **MOR 2** · **CAR set to 5**
+
+Then three mornings:
+
+> Tuesday's filing has been returned.
+>
+> This is the second such return this month. The previous one is also being returned, for
+> completeness, as it was outstanding.
+>
+> No reason has been provided for either.
+
+**PROBATION: CAR 5 → 4 → 3 → 2.**
+
+> *Goblin 4:* Was something said to you?
+> *You:* About the title?
+> *Goblin 4:* About anything. You look like someone said something.
+
+**The player now knows.** Being bad at the job is the only thing that has ever worked for
+them, and there is no memo anywhere in this fortress that says so.
+
 ---
 
 ## END STATES
@@ -239,7 +264,7 @@ who learns the correlation will *aim* for unwinnable tickets, and the run become
 for tickets that cannot be won. The 15% is doing a lot of work here. If playtests show
 players hunting for losses, drop it to 5% or gate it behind a first-strike-only window.
 
-**Goblin advocacy (MOR 9+ and a quiet week).**
+**Goblin advocacy (MOR 9+, a quiet week, and a rung to climb).**
 Reachable only by *not* misfiling. The canonical run's week-6 state is MOR 2, so advocacy
 is closed. A player who has never touched the catch-all can hit MOR 9 by weeks 3–4 and
 promote at the first quiet day. **This is the good-player path and it is strictly worse** —
@@ -251,14 +276,6 @@ ends week 6 at PAT 0, CAR 0, MOR 0, S 2/3 — one strike from the Mines, having 
 they never signed. This is the darkest available line and it's currently unwinnable. That may
 be correct. Flagging it rather than fixing it: a player who enjoys the bad filing should not
 be able to do it forever with no cost beyond slow slide.
-
-
-> Your title has been updated. The effective date is today. No meeting has been scheduled
-> and none is required.
->
-> The filing quality concern raised on the 14th is considered closed.
-
-**TITLE: Regional Manager** · **MOR 2** · **CAR set to 5**
 
 ---
 
@@ -319,24 +336,3 @@ that story, the design has stopped working.
    the player will feel it before they understand it.
 5. **Does the dragon's verdictless review read as a bug?** He gets no pass/fail, ever, and
    never finds out how it went. This is a bet. Confirm the bet.
-
-
-Then three mornings:
-
-> Tuesday's filing has been returned.
->
-> This is the second such return this month. The previous one is also being returned, for
-> completeness, as it was outstanding.
->
-> No reason has been provided for either.
-
-**PROBATION: CAR 5 → 4 → 3 → 2.**
-
-> *Goblin 4:* Was something said to you?
-> *You:* About the title?
-> *Goblin 4:* About anything. You look like someone said something.
-
-**The player now knows.** Being bad at the job is the only thing that has ever worked for
-them, and there is no memo anywhere in this fortress that says so.
-
-`PROTOTYPE.md` to reconcile.
