@@ -43,8 +43,9 @@ anything. The trap resolves itself.
 **Consequence for the prototype:** the promotion fires on the *first* catch-all filed while
 demoted with MOR ≥ 2. It does not require three Tuesdays. The "three Tuesdays" framing in
 `PROTOTYPE.md` was discovery pacing — a player misfiling repeatedly at the top and getting
-nothing — and the real trigger is one deliberate wrong filing once demoted. Flagged for
-`PROTOTYPE.md` to reconcile.
+nothing — and the real trigger is one deliberate wrong filing once demoted. **Reconciled:**
+`PROTOTYPE.md` THE READ now tests a run to week 5 rather than three Tuesdays of guessing at
+the top of the ladder.
 
 ---
 

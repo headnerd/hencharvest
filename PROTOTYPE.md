@@ -298,18 +298,16 @@ them, and there is no memo anywhere in this fortress that says so.
 
 ---
 
-
----
-
 ## THE READ
 
 What this prototype is *for*. Five things, in priority order.
 
 1. **Does the misfiling promotion work without being explained?** This is the only real
-   test. Play scene 1 option 4 three Tuesdays running, watch the title change, and see
-   whether you connect it. If you connect it *immediately*, the verdict text is too clear
-   and the discovery is dead. If you never connect it, it reads as a bug. The window is
-   narrow and it is the whole game.
+   test. The promotion fires on the *first* catch-all filed while you have a rung to
+   climb, so the test is a run to week 5, not three Tuesdays of guessing at the top of the
+   ladder. Watch the title change and see whether you connect it. If you connect it
+   *immediately*, the verdict text is too clear and the discovery is dead. If you never
+   connect it, it reads as a bug. The window is narrow and it is the whole game.
 2. **The Chosen One never appears doing anything cool.** He is a filing problem from the
    first line to the last. I'd defend that hard — his power is that he is *unfixable as a
    process*, and the moment he becomes a boss fight, the game stops being about management.
@@ -323,9 +321,19 @@ What this prototype is *for*. Five things, in priority order.
    arrives at the goblins' ask with no Morale to spend. The branches are exclusive by
    arithmetic, not by script. Check that it doesn't feel like a closed door.
 
-**One open worry.** The catch-all currently looks like a trap for new players — it's the
-fourth option, it's always wrong, and it costs three meters. A first-run player will learn
-to never touch it, which is correct behaviour and exactly the opposite of what the
-promotion needs. That tension is real and I don't know yet how to solve it. Possibly the
-verdict should occasionally make the catch-all look *tempting* for reasons that are also
-wrong. Flagging it rather than pretending I've handled it.
+> **RESOLVED — the worry was real, and the fix was structural.** This used to read: *the
+> catch-all looks like a trap for new players, and a first-run player will learn to never
+> touch it, and that is exactly the opposite of what the promotion needs.* That is all still
+> true, and it stopped being a problem the moment the promotion was made conditional.
+>
+> The catch-all only pays when the player is **demoted** (`DESIGN.md` §7.3). A player at
+> full title has no rung to climb, so the option is on screen from week one and genuinely
+> does nothing — which means a first-run player has no reason to try it, learns nothing
+> false, and is never punished for avoiding it. They have to get worse before it means
+> anything. **The learning curve is built into the state, not into the UI**, and no badge
+> or hint is needed to teach it.
+>
+> The residual is deliberate, not an oversight: a player who never takes a demotion never
+> meets the game's best joke. That is the mutual exclusion in item 5, and it is the same
+> exclusion as the hero-defeated ending. Both wins are reachable only by giving something
+> up, and the player picks a philosophy rather than a strategy.
