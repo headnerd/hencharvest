@@ -23,7 +23,7 @@ system you are stuck inside, not from the monsters — and the strongest ending 
 
 ## Status
 
-All six weeks are built and playable. 41 tests pass, including an end-to-end simulation
+All six weeks are built and playable. 54 tests pass, including an end-to-end simulation
 that plays the real content through the real engine — so the design docs are a regression
 suite, not just documentation.
 

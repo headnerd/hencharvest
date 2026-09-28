@@ -21,6 +21,8 @@ export interface Beat {
   scene: Week["days"][number]["scenes"][number];
   /** True on the first scene of a day, so the engine ticks once per day here. */
   isDayStart: boolean;
+  /** True when the author marked the day quiet. The only days that can earn advocacy. */
+  quietDay: boolean;
 }
 
 export const BEATS: Beat[] = WEEKS.flatMap((week) =>
@@ -30,6 +32,7 @@ export const BEATS: Beat[] = WEEKS.flatMap((week) =>
       day,
       scene,
       isDayStart: i === 0,
+      quietDay: day.quiet === true,
     })),
   ),
 );

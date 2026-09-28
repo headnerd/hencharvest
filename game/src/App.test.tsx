@@ -85,4 +85,28 @@ describe("content invariants", () => {
       }
     }
   });
+
+  it("has exactly one unwinnable ticket, and filing it correctly is still not enough", () => {
+    // DESIGN.md 6.2 / locked decision 4. Before the grievance scene existed, `unwinnable`
+    // appeared in the types and nowhere in the content, so INSUFFICIENT was never rendered.
+    const unwinnable = BEATS.filter((b) => b.scene.unwinnable);
+    expect(unwinnable).toHaveLength(1);
+    expect(unwinnable[0]?.scene.choices.find((c) => c.correct)?.verdict).toBe("INSUFFICIENT");
+  });
+
+  it("has at least one quiet day, and a quiet day never has the Chosen One in it", () => {
+    expect(BEATS.some((b) => b.quietDay)).toBe(true);
+    for (const beat of BEATS) {
+      if (beat.quietDay) expect(beat.scene.isChosenOne).toBeFalsy();
+    }
+  });
+
+  it("only a quiet day raises goblin morale — advocacy is unreachable without one", () => {
+    // The invariant that makes the MOR 9+ gate reachable at all. Morale used to be
+    // monotonically non-increasing across all six weeks, so a number the game could never
+    // produce was gating a promotion that could never fire.
+    const raisers = BEATS.filter((b) => b.scene.choices.some((c) => (c.deltas?.morale ?? 0) > 0));
+    expect(raisers.length).toBeGreaterThan(0);
+    for (const beat of raisers) expect(beat.quietDay).toBe(true);
+  });
 });

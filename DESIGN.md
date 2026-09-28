@@ -207,6 +207,15 @@ recognition that the system had already decided.
 > correct filing, and it was always going to be insufficient, and these two facts were
 > never going to be reconciled by anyone, least of all by you.
 
+> **SHIPPED — this is the Chosen One's grievance, in week 6.** He leaves it on the
+> requisition tray, by hand, with no case number, because the form has no field for a
+> person. Filed as a Scheduling Conflict it is accepted and it changes nothing: the
+> fortress can only file him as a workload, and a workload cannot be answered. Verdict
+> `INSUFFICIENT` — which until this scene existed was a verdict nothing in the run could
+> produce. There is exactly one unwinnable ticket, which is also what keeps the letterhead
+> a 15% shot rather than a strategy, and what makes the pacing rule below a guarantee
+> rather than a hope.
+
 **Pacing rule:** unwinnable tickets cannot be back to back. They need a survivable filing
 between them or the player stops engaging with the choices and starts clicking. A loss the
 player caused should always be followed by one they could have prevented.
@@ -309,6 +318,31 @@ not win, so the promotion is meaningless. Promoted for a defeat.
 **Goblin advocacy** is the inversion of every other system — the reward for a good week
 arrives when nothing happened, which is not directly engineerable. It pays §3.4 (the only
 system rewarding decency) without making the goblins a career tool.
+
+> **BOTH OF THESE WERE UNREACHABLE AND WERE NOT.** `rollLetterhead` and `advocacyEligible`
+> were written, tested in isolation, and called from nowhere — no `App.tsx` path, and no
+> content that could satisfy either. Worse, the requirements themselves were impossible:
+> every morale delta in six weeks of content was **−1**, so morale was monotonically
+> non-increasing and `Morale 9+` was a number the game could not produce; and `unwinnable`
+> appeared in `types.ts` and in no content file at all, so there was no ticket to file
+> correctly and no way to earn the letterhead. Locked decision 4 had no implementation.
+>
+> What changed: week 5 gained a **quiet day** — Thursday, no incursion, the queue at four
+> hundred and two — the only place in the run that raises morale (+3), taking a careful
+> player from 6 to 9. Week 6 gained the **grievance**, the run's single unwinnable ticket.
+> Both are content, not wiring: a recovery is not implemented until there is something in
+> the game that can trigger it.
+>
+> The consequence is arithmetic, and it is the good part. Spending Morale on the catch-all
+> is what closes the advocacy door; being at the top rung is what closes the letterhead
+> door. A player cannot take both in one run, and the two paths are now genuinely
+> exclusive — which §7.4 had always claimed and nothing had enforced.
+>
+> One caution the 2-day guard (§7.5) creates: advocacy pays at the end of the week-5 quiet
+> day, which sets the gate to 2, which is still counting when the week-6 grievance is
+> filed. The letterhead therefore cannot fire for the player who *just* took advocacy. That
+> is the guard working, not a bug — but it means the letterhead's only window is a player
+> who is demoted, below Morale 9, and not mid-recovery. Narrow on purpose.
 
 **Hero defeated** is rare and terminal, and fires once. It is the run's win state. It must
 never be presented as a goal, or players start filing to kill the hero and the game becomes

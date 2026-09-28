@@ -73,6 +73,60 @@ export const week6: Week = {
           ],
         },
         {
+          id: "w6-grievance",
+          title: "THE GRIEVANCE",
+          unwinnable: true,
+          body: [
+            "The Chosen One has left a grievance. Not the sword. Not the notice. A grievance, on the requisition tray, in handwriting, with his name on the bottom of it and no case number, because the form for this has no field for a person.",
+            "It has been on the tray since Tuesday. It is the only item in this building that has moved in that direction.",
+          ],
+          choices: [
+            {
+              id: "w6-file-grievance-scheduling",
+              label: "1. SCHEDULING CONFLICT",
+              note: "He left it on a Tuesday. The tray is a standing conflict.",
+              correct: true,
+              verdict: "INSUFFICIENT",
+              deltas: { patience: -1, career: 1 },
+              resolution: [
+                "The filing is correct. The filing is also not the problem. The problem is that he wrote it by hand, and the system has no way to receive something a person wrote, so it has received it as a scheduling matter, and it is now formally a scheduling matter, and formally is the only place it will ever live.",
+                "He asked for something. It is still on the tray. It will be on the tray on Tuesday, and Tuesday is a scheduling matter, and Tuesday is the only category there is.",
+              ],
+            },
+            {
+              id: "w6-file-grievance-safety",
+              label: "2. SAFETY COMPLIANCE",
+              note: "The grievance is about the trap. Probably.",
+              verdict: "INSUFFICIENT",
+              deltas: { patience: 1, morale: -1 },
+              resolution: [
+                "Filed against the hazard assessment. The assessment does not have a field for what he actually wrote, so it has recorded that he was near a hazard, which he was, and which was not the subject.",
+              ],
+            },
+            {
+              id: "w6-file-grievance-deprecation",
+              label: "3. DEPRECATION NOTICE",
+              note: "The tray is undocumented.",
+              verdict: "REJECTED",
+              deltas: { career: -1 },
+              resolution: [
+                "You have filed this before and the tray is still the tray. The notice is returned with the tray attached to it, which is not how returns work, and which nobody has corrected.",
+              ],
+            },
+            {
+              id: "w6-file-grievance-other",
+              label: "4. OTHER / UNCATEGORIZED",
+              note: "No box fits. File it anyway.",
+              verdict: "REJECTED",
+              deltas: { patience: -1, career: -1, morale: -1 },
+              recovery: "MISFILE",
+              resolution: [
+                "Filed under Other. The queue is at four hundred and four, and the grievance is in it, and the grievance is the only thing in the queue that was written by somebody who wanted something.",
+              ],
+            },
+          ],
+        },
+        {
           id: "w6-memo",
           title: "FROM: THE DARK LORD",
           noVerdict: true,

@@ -93,5 +93,37 @@ export const week5: Week = {
         },
       ],
     },
+    {
+      id: "w5-quiet",
+      heading: "THURSDAY — NO SCHEDULED INCURSION",
+      quiet: true,
+      scenes: [
+        {
+          id: "w5-quiet-standup",
+          title: "STANDUP, THURSDAY MORNING",
+          noVerdict: true,
+          body: [
+            "There is no scheduled incursion today. This is noted in the calendar, which is correct, and in the standup, which is also correct, and neither of these is the same thing.",
+            "The queue is at four hundred and two. Nothing in this fortress has been harmed today and nothing has been helped, and the distance between those two is the entire job.",
+          ],
+          choices: [
+            {
+              id: "w5-quiet-continue",
+              label: "Continue",
+              deltas: { morale: 3 },
+              resolution: [
+                "Goblin 1: You filed him correctly again.",
+                "Goblin 4: He did.",
+                "Goblin 1: Six Tuesdays.",
+                "Goblin 4: It's a good rate.",
+                "Goblin 1: It's a rate. It isn't a result. Those are different columns and we have only ever populated one of them.",
+                "Goblin 4: Which one.",
+                "Goblin 1: Not on a Thursday. There is no form for it on a Thursday.",
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
 };

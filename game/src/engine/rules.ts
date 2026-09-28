@@ -148,16 +148,26 @@ export function tickDay(state: RunState): RunState {
   return resolveStrikes(next, next.day);
 }
 
-/** The letterhead. 15% on a correctly-filed unwinnable ticket. */
+/**
+ * The letterhead. 15% on a correctly-filed unwinnable ticket.
+ *
+ * Rung gate included, same as every other recovery: the letterhead costs no morale, so
+ * without one a player already at the top rung banks a "promotion" that goes nowhere and
+ * still eats the probation it triggers. It is the most abusable of the four, which is
+ * exactly why it is also the quietest. See DESIGN.md 7.4.
+ */
 export function rollLetterhead(state: RunState, rng: Rng, eligible: boolean): boolean {
-  return eligible && state.recoveryGate === 0 && rng.chance(0.15);
+  return eligible && hasRungToClimb(state) && state.recoveryGate === 0 && rng.chance(0.15);
 }
 
-/** Goblin advocacy: high morale, a day with nothing on it, and a rung to climb. */
+/**
+ * Goblin advocacy: high morale, a day with nothing on it, and a rung to climb.
+ *
+ * The one recovery that rewards correct play, and the only one with no filing attached.
+ * It is paid on the *day* rather than the ticket, which is why it needs `day.quiet` in
+ * the content rather than anything on the scene. See DESIGN.md 7.4.
+ */
 export function advocacyEligible(state: RunState, quietDay: boolean): boolean {
-  // Same rung gate as the catch-all. Advocacy costs no morale, so without this a player
-  // at full title banks a "promotion" that goes nowhere — and still eats the probation
-  // it triggers. See DESIGN.md 7.4.
   return quietDay && state.meters.morale >= 9 && state.recoveryGate === 0 && hasRungToClimb(state);
 }
 

@@ -259,18 +259,23 @@ by construction.
 The paths the canonical run did *not* take, and what each teaches us.
 
 **The letterhead (15%, on an unwinnable ticket filed correctly).**
-Reachable whenever the player files a solvable ticket that the system has already decided
-against. Promotes a rung for free — no Morale cost, no deliberation. The problem: a player
-who learns the correlation will *aim* for unwinnable tickets, and the run becomes a search
-for tickets that cannot be won. The 15% is doing a lot of work here. If playtests show
-players hunting for losses, drop it to 5% or gate it behind a first-strike-only window.
+Reachable when the player files the **grievance** in week 6 correctly while demoted. That
+scene is the run's only unwinnable ticket, so there is nothing to hunt for and the 15% is
+the whole of the strategy — a player *cannot* aim for it, only wait for it. Promotes a rung
+for free: no Morale cost, no deliberation. The window is narrow — demoted, below MOR 9 so
+advocacy is closed, and outside the 2-day recovery gate. If playtests show players
+*expecting* it rather than surprised by it, drop it to 5%.
 
-**Goblin advocacy (MOR 9+, a quiet week, and a rung to climb).**
-Reachable only by *not* misfiling. The canonical run's week-6 state is MOR 2, so advocacy
-is closed. A player who has never touched the catch-all can hit MOR 9 by weeks 3–4 and
-promote at the first quiet day. **This is the good-player path and it is strictly worse** —
-earlier, but capped, and it requires the player to keep doing the thing the game says does
-not work. Correct by design. Worth confirming it doesn't feel like a punishment.
+**Goblin advocacy (MOR 9+, a quiet day, and a rung to climb).**
+Reachable only by *not* misfiling — and, until now, not at all. Morale was monotonically
+non-increasing across all six weeks, so MOR 9 was a number the game could not produce, and
+no day in the run had nothing scheduled on it. Both are fixed: week 5 now has a **quiet
+day** (Thursday, no incursion, MOR +3), the only place in the run that raises morale, and
+it takes a careful player from 6 to 9. The canonical run's week-6 state is MOR 2, so
+advocacy is closed for anyone who misfiles. **This is the good-player path and it is
+strictly worse** — earlier, but capped, and it requires the player to keep doing the thing
+the game says does not work. Correct by design. Worth confirming it doesn't feel like a
+punishment.
 
 **The queue branch.** A player who files catch-all on *every* Tuesday and never recovers
 ends week 6 at PAT 0, CAR 0, MOR 0, S 2/3 — one strike from the Mines, having held a job

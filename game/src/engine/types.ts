@@ -120,6 +120,12 @@ export interface Day {
   scenes: Scene[];
   /** Closing standup, if any. */
   standup?: string[];
+  /**
+   * A day with nothing scheduled on it. Declared, not inferred: the memo days have no
+   * Chosen One either, and a day on which the Dark Lord takes four patience off you is
+   * not a quiet one. Only a day the author marked earns goblin advocacy. See DESIGN.md 7.4.
+   */
+  quiet?: boolean;
 }
 
 export interface Week {

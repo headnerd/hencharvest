@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
 import type { RunState } from "./types";
 import {
+  advocacyEligible,
   applyDeltas,
   applyRecovery,
   canMisfile,
   clamp,
   isRunOver,
   resolveStrikes,
+  rollLetterhead,
   tickDay,
 } from "./rules";
 import { Rng } from "./rng";
@@ -144,6 +146,70 @@ describe("the misfiling promotion", () => {
     const climbed = applyRecovery(run({ strikes: 1, title: "REGIONAL_MANAGER_DEPUTY" }), "MISFILE");
     expect(climbed.strikes).toBe(1);
     expect(canMisfile({ ...climbed, recoveryGate: 0 })).toBe(false);
+  });
+});
+
+describe("the letterhead", () => {
+  const deputy = () => run({ strikes: 1, title: "REGIONAL_MANAGER_DEPUTY" });
+
+  it("fires for a correctly-filed unwinnable ticket, roughly 15% of the time", () => {
+    let fired = 0;
+    for (let seed = 0; seed < 400; seed++) {
+      if (rollLetterhead(deputy(), new Rng(seed), true)) fired++;
+    }
+    // 400 rolls at 15% should land near 60. The band is loose on purpose; the point is
+    // that it is a real probability and not a certainty in either direction.
+    expect(fired).toBeGreaterThan(30);
+    expect(fired).toBeLessThan(90);
+  });
+
+  it("never fires without a rung to climb, whatever the roll says", () => {
+    // The letterhead costs no morale, so without this gate a top-rung player banks a
+    // promotion that goes nowhere and still eats the probation.
+    for (let seed = 0; seed < 400; seed++) {
+      expect(rollLetterhead(run(), new Rng(seed), true)).toBe(false);
+    }
+  });
+
+  it("does not fire on a solvable ticket", () => {
+    expect(rollLetterhead(deputy(), new Rng(0), false)).toBe(false);
+  });
+
+  it("does not fire during the 2-day recovery gate", () => {
+    const gated = run({ strikes: 1, title: "REGIONAL_MANAGER_DEPUTY", recoveryGate: 1 });
+    for (let seed = 0; seed < 200; seed++) {
+      expect(rollLetterhead(gated, new Rng(seed), true)).toBe(false);
+    }
+  });
+});
+
+describe("goblin advocacy", () => {
+  const demoted = (morale: number) =>
+    run({
+      strikes: 1,
+      title: "REGIONAL_MANAGER_DEPUTY",
+      meters: { patience: 5, career: 4, morale },
+    });
+
+  it("pays on a quiet day when the goblins are in good graces", () => {
+    expect(advocacyEligible(demoted(9), true)).toBe(true);
+  });
+
+  it("does not pay at morale 8", () => {
+    expect(advocacyEligible(demoted(8), true)).toBe(false);
+  });
+
+  it("does not pay on a day with something scheduled on it", () => {
+    expect(advocacyEligible(demoted(10), false)).toBe(false);
+  });
+
+  it("does not pay a manager already at the top rung", () => {
+    const atTop = run({ meters: { patience: 5, career: 4, morale: 10 } });
+    expect(advocacyEligible(atTop, true)).toBe(false);
+  });
+
+  it("does not pay during the 2-day recovery gate", () => {
+    expect(advocacyEligible({ ...demoted(10), recoveryGate: 1 }, true)).toBe(false);
   });
 });
 

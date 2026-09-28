@@ -2,13 +2,16 @@ import { useCallback, useEffect, useState } from "react";
 import type { Choice, RunState, Verdict } from "./engine/types";
 import { BEATS, TOTAL_SCENES } from "./content";
 import {
+  advocacyEligible,
   applyDeltas,
   applyRecovery,
   canMisfile,
   isRunOver,
   resolveStrikes,
+  rollLetterhead,
   tickDay,
 } from "./engine/rules";
+import { Rng } from "./engine/rng";
 import { newRun, loadRun, saveRun, clearRun, exportRun } from "./engine/persist";
 
 /**
@@ -35,6 +38,17 @@ const TITLE_LABEL: Record<RunState["title"], string> = {
   MINES: "Mines",
 };
 
+/**
+ * The stream a single decision rolls against.
+ *
+ * Derived from the run seed and the position in the run rather than held as state, so a
+ * seeded run replays identically — which is the whole reason `Rng` exists, and the whole
+ * reason the letterhead is 15% and not "when the player seems to have earned it".
+ */
+function decisionRng(state: RunState): Rng {
+  return new Rng((state.seed + state.day * 1000 + state.sceneIndex) >>> 0);
+}
+
 export default function App() {
   const [run, setRun] = useState<RunState>(() => loadRun() ?? newRun());
   // Set once a choice is made, so the resolution and verdict show before choices return.
@@ -56,6 +70,16 @@ export default function App() {
         next = applyRecovery(next, "MISFILE");
       }
 
+      // The letterhead. A correctly-filed unwinnable ticket, 15% of the time, promotes
+      // you for surviving it — promoted for a defeat. See DESIGN.md 7.4.
+      const unwinnable = beat?.scene.unwinnable === true;
+      next = { ...next, unwinnableLastScene: unwinnable };
+      // `!prev.unwinnableLastScene` is the 6.2 pacing guard: unwinnable tickets cannot
+      // be back to back, so the second one cannot pay.
+      if (unwinnable && choice.correct && rollLetterhead(next, decisionRng(next), !prev.unwinnableLastScene)) {
+        next = applyRecovery(next, "LETTERHEAD");
+      }
+
       // Hero-defeated streak: only correct Chosen One filings count.
       if (choice.correct && beat?.scene.isChosenOne) {
         next = { ...next, heroStreak: next.heroStreak + 1 };
@@ -74,7 +98,15 @@ export default function App() {
       const ticked = isDayStart
         ? tickDay({ ...prev, day: prev.day + 1, sceneIndex: nextIndex })
         : { ...prev, sceneIndex: nextIndex };
-      return isDayStart ? resolveStrikes(ticked, prev.day + 1) : ticked;
+      const rolled = isDayStart ? resolveStrikes(ticked, prev.day + 1) : ticked;
+
+      // Goblin advocacy. Paid at the END of a quiet day, not on a ticket, and only if the
+      // player is still demoted and in the goblins' good graces. Nothing announces it.
+      const finishedQuietDay =
+        BEATS[prev.sceneIndex]?.quietDay === true && BEATS[nextIndex]?.day.id !== BEATS[prev.sceneIndex]?.day.id;
+      return finishedQuietDay && advocacyEligible(rolled, true)
+        ? applyRecovery(rolled, "ADVOCACY")
+        : rolled;
     });
     setPending(null);
   }, []);
