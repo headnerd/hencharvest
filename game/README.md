@@ -12,7 +12,21 @@ npm test         # 36 tests
 npm run build    # -> dist/, static
 ```
 
+## Contributing
+
+- The four design docs in the root are the **source of truth**, not the code. If a system
+  changes, the doc changes first, then the code, then the test.
+- `game/src/content/week*.ts` is where the writing lives. Adding a week means adding a
+  data file — do not put prose in components.
+- Run `npm test` before committing. The end-to-end simulation is the one that catches
+  design regressions; the rest are cheap insurance.
+- Two conventions are enforced by tests and should not be worked around: the UI never
+  explains a recovery, and `correct: true` is never rendered.
+
 ## Deploying to Cloudflare Pages
+
+> **Play-verify weeks 2 and 4 first.** The tests prove the arc completes; they cannot prove
+> it is funny. See the root `README.md` for why those two beats are the gate.
 
 Static SPA, no config file needed:
 
@@ -21,6 +35,12 @@ Static SPA, no config file needed:
 | Build command | `npm run build` |
 | Build output directory | `dist` |
 | Root directory | `game` |
+
+**No SPA 404-rewrite is needed.** There is no router in this codebase — the game is one
+linear document that renders a single beat at a time — so there are no client-side routes
+to fall through on. If a router is ever added, that changes and this needs revisiting.
+
+Saves use `localStorage`, so every player's run is their own. No accounts, no sync.
 
 ## Architecture
 
