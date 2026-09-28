@@ -1,2 +1,6 @@
 .DS_Store
 *.log
+
+# Cline session exports. These are megabytes of conversation, and they belong to
+# whichever project they were captured in — not the one they happen to land in.
+*.messages.json
