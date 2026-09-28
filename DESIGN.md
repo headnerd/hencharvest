@@ -257,7 +257,7 @@ at the job, and no one in the fortress will ever say so, because it was never in
 
 | | |
 | --- | --- |
-| Requires | **Player is demoted (S ≥ 1)**, Morale ≥ 2, deliberate, post-verdict knowledge, not within 2 days of a recovery |
+| Requires | **The player has a rung to climb** (title is Deputy or Acting), Morale ≥ 2, deliberate, post-verdict knowledge, not within 2 days of a recovery |
 | Effect | Climb one rung, **−2 Morale** |
 | Fiction | A rejection memo that reads as a warning, unsigned |
 
@@ -276,16 +276,29 @@ to try for it. It also dissolves the "catch-all looks like a trap for new player
 (`PROTOTYPE.md` THE READ): the option is on screen from week one and genuinely does nothing
 until the player has been demoted. The learning curve is built into the state, not into UI.
 
-**Trigger:** the promotion fires on the *first* catch-all filed while demoted with
-Morale ≥ 2. It does not require a run of three. See `BRANCHING.md` weeks 4–6.
+> **CORRECTED — the condition is "a rung to climb", not "S ≥ 1".** The draft phrasing said
+> *S ≥ 1*, and that is wrong once recoveries exist. A recovery does not clear your strikes,
+> so a player promoted from Deputy back to Regional Manager still has S = 1 and no rung left
+> to climb. Keying the promotion off the strike count therefore both (a) refused to promote
+> an Acting manager back to Deputy — killing the only promotion a deep run has left — and
+> (b) promised a promotion to a player already at the top. Strikes are a *count of demotions*;
+> whether a rung exists above you is a *function of your title*, and the two are not the same
+> question. The engine now derives it from the title, which cannot drift.
+
+The same condition applies to **goblin advocacy** (§7.4), which was silently gated on the
+same flag with nothing in this document saying so. Advocacy climbs a rung; if there is no
+rung, there is nothing to climb, and the same reasoning applies.
+
+**Trigger:** the promotion fires on the *first* catch-all filed while the player has a rung
+to climb and Morale ≥ 2. It does not require a run of three. See `BRANCHING.md` weeks 4–6.
 
 ### 7.4 The four recoveries
 
 | Source | Requirement | Effect |
 | --- | --- | --- |
-| **Catch-all misfiling** | **Demoted (S ≥ 1)**, Morale ≥ 2, deliberate, no recovery in prior 2 days | Climb one rung, −2 Morale |
+| **Catch-all misfiling** | **A rung to climb** (Deputy or Acting), Morale ≥ 2, deliberate, no recovery in prior 2 days | Climb one rung, −2 Morale |
 | **The letterhead** | Filed correctly on an unwinnable ticket; 15%; no recovery in prior 2 days | Climb one rung, free |
-| **Goblin advocacy** | Morale 9+ **and** a quiet week (a day with no incursion) | Climb one rung |
+| **Goblin advocacy** | Morale 9+ **and** a quiet week (a day with no incursion) **and a rung to climb** | Climb one rung |
 | **Hero defeated** | 3 consecutive correct Chosen One filings across 3 Tuesdays | Run ends, top title |
 
 **The letterhead** reuses §6.2 deliberately: you are promoted for surviving a ticket you could

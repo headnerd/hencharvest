@@ -27,7 +27,6 @@ function run(overrides: Partial<RunState> = {}): RunState {
     meters: { patience: 7, career: 6, morale: 6 },
     title: "REGIONAL_MANAGER",
     strikes: 0,
-    demoted: false,
     probation: 0,
     recoveryGate: 0,
     heroStreak: 0,
@@ -88,29 +87,29 @@ describe("strikes", () => {
 });
 
 describe("the misfiling promotion", () => {
-  const demoted = run({ strikes: 1, demoted: true, title: "REGIONAL_MANAGER_DEPUTY" });
+  const deputy = run({ strikes: 1, title: "REGIONAL_MANAGER_DEPUTY" });
 
   it("does NOT fire at full title — the bug BRANCHING.md caught", () => {
     expect(canMisfile(run())).toBe(false);
   });
 
   it("fires when demoted with morale to spare", () => {
-    expect(canMisfile(demoted)).toBe(true);
+    expect(canMisfile(deputy)).toBe(true);
   });
 
   it("does not fire without the morale to pay for it", () => {
     expect(
-      canMisfile(run({ strikes: 1, demoted: true, meters: { patience: 5, career: 3, morale: 1 } })),
+      canMisfile(run({ strikes: 1, title: "REGIONAL_MANAGER_DEPUTY", meters: { patience: 5, career: 3, morale: 1 } })),
     ).toBe(false);
   });
 
   it("does not fire during the 2-day recovery gate", () => {
-    expect(canMisfile(run({ strikes: 1, demoted: true, recoveryGate: 1 }))).toBe(false);
+    expect(canMisfile(run({ strikes: 1, title: "REGIONAL_MANAGER_DEPUTY", recoveryGate: 1 }))).toBe(false);
   });
 
   it("climbs the rung, costs 2 morale, and sets career to 5", () => {
     const s = applyRecovery(
-      run({ strikes: 1, demoted: true, title: "REGIONAL_MANAGER_DEPUTY", meters: { patience: 4, career: 3, morale: 5 } }),
+      run({ strikes: 1, title: "REGIONAL_MANAGER_DEPUTY", meters: { patience: 4, career: 3, morale: 5 } }),
       "MISFILE",
     );
     expect(s.title).toBe("REGIONAL_MANAGER");
@@ -121,16 +120,36 @@ describe("the misfiling promotion", () => {
 
   it("climbs Acting to Deputy, not straight to the top", () => {
     const s = applyRecovery(
-      run({ strikes: 2, demoted: true, title: "REGIONAL_MANAGER_ACTING" }),
+      run({ strikes: 2, title: "REGIONAL_MANAGER_ACTING" }),
       "MISFILE",
     );
     expect(s.title).toBe("REGIONAL_MANAGER_DEPUTY");
+  });
+
+  it("still offers the catch-all after climbing Acting to Deputy", () => {
+    // The regression this replaced. `demoted` used to be a stored flag that applyRecovery
+    // cleared whatever it climbed to, so an Acting manager who climbed to Deputy lost the
+    // catch-all for the rest of the run — the only promotion a deep run has left.
+    const climbed = applyRecovery(
+      run({ strikes: 2, title: "REGIONAL_MANAGER_ACTING", meters: { patience: 4, career: 3, morale: 4 } }),
+      "MISFILE",
+    );
+    expect(climbed.title).toBe("REGIONAL_MANAGER_DEPUTY");
+    expect(canMisfile({ ...climbed, recoveryGate: 0 })).toBe(true);
+  });
+
+  it("does not offer the catch-all to a manager already at the top", () => {
+    // Strikes are still 1 after climbing to the top rung, so the strike count cannot
+    // stand in for the title. This is the other half of the same bug.
+    const climbed = applyRecovery(run({ strikes: 1, title: "REGIONAL_MANAGER_DEPUTY" }), "MISFILE");
+    expect(climbed.strikes).toBe(1);
+    expect(canMisfile({ ...climbed, recoveryGate: 0 })).toBe(false);
   });
 });
 
 describe("probation", () => {
   it("drains career one per day for three days, then stops", () => {
-    let s = applyRecovery(run({ strikes: 1, demoted: true }), "MISFILE");
+    let s = applyRecovery(run({ strikes: 1, title: "REGIONAL_MANAGER_DEPUTY" }), "MISFILE");
     expect(s.meters.career).toBe(5);
     s = tickDay(s);
     expect(s.meters.career).toBe(4);
@@ -142,7 +161,7 @@ describe("probation", () => {
   });
 
   it("counts the recovery gate down", () => {
-    let s = applyRecovery(run({ strikes: 1, demoted: true }), "MISFILE");
+    let s = applyRecovery(run({ strikes: 1, title: "REGIONAL_MANAGER_DEPUTY" }), "MISFILE");
     expect(s.recoveryGate).toBe(2);
     s = tickDay(tickDay(tickDay(s)));
     expect(s.recoveryGate).toBe(0);

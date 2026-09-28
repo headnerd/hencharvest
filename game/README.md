@@ -8,7 +8,7 @@
 cd game
 npm install
 npm run dev      # http://localhost:5173
-npm test         # 36 tests
+npm test         # 41 tests
 npm run build    # -> dist/, static
 ```
 
@@ -69,7 +69,7 @@ completely unreachable. See `DESIGN.md` §3.2.
 
 ## Tests
 
-36 tests, three files:
+41 tests, three files:
 
 - `engine/rules.test.ts` — the rules in isolation
 - `engine/simulation.test.ts` — **the whole six weeks played through the real content**, which

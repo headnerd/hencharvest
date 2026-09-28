@@ -37,8 +37,6 @@ export interface RunState {
   meters: Meters;
   title: Title;
   strikes: Strikes;
-  /** True while the run is in a demotion title. Gates the catch-all promotion. */
-  demoted: boolean;
   /** Remaining days of the -1/day probation drain after a recovery. */
   probation: number;
   /** Days until another recovery is permitted. See DESIGN.md 7.5. */

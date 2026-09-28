@@ -51,7 +51,6 @@ export function newRun(seed = makeSeed()): RunState {
     meters: { patience: 7, career: 6, morale: 6 },
     title: "REGIONAL_MANAGER",
     strikes: 0,
-    demoted: false,
     probation: 0,
     recoveryGate: 0,
     heroStreak: 0,

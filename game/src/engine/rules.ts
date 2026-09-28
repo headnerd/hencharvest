@@ -25,6 +25,20 @@ const STRIKE_TITLES: Record<Exclude<Strikes, 0>, Title> = {
 };
 
 /**
+ * Does the player have a rung above them to climb?
+ *
+ * This is the gate on every recovery, and it is derived from the title rather than stored.
+ * The run used to carry a `demoted` boolean set alongside the title, and it drifted: a
+ * recovery climbed Acting to Deputy and set the flag false anyway, so the catch-all went
+ * dead on the only path a deep run has left. Strikes cannot stand in for this either — a
+ * recovery does not clear strikes, so a player promoted back to Regional Manager still has
+ * strikes = 1 with no rung above them. See DESIGN.md 7.3.
+ */
+export function hasRungToClimb(state: RunState): boolean {
+  return state.title === "REGIONAL_MANAGER_DEPUTY" || state.title === "REGIONAL_MANAGER_ACTING";
+}
+
+/**
  * Take a demotion strike if patience has bottomed out.
  *
  * PATIENCE is the strike trigger, not career. This is the fix for a real bug the
@@ -53,7 +67,6 @@ export function resolveStrikes(state: RunState, day = 0): RunState {
     ...state,
     strikes: nextStrikes,
     title,
-    demoted: nextStrikes < 3,
     lastStrikeDay: day,
     // Both meters reset on a demotion. Career to 4 because a demotion is a rung down,
     // not a run over. Patience to 4 because he moves on — without this, patience sits at
@@ -65,15 +78,14 @@ export function resolveStrikes(state: RunState, day = 0): RunState {
 /**
  * Conditions for the catch-all misfiling promotion (DESIGN.md 7.3).
  *
- * The demotion requirement is load-bearing. At full title there is no rung to climb, so
- * the misfiling would "promote" you to the title you already hold — which is a bug we hit
+ * The rung requirement is load-bearing. At full title there is no rung to climb, so the
+ * misfiling would "promote" you to the title you already hold — which is a bug we hit
  * while building BRANCHING.md. It also means a brand-new player has no reason to try the
  * catch-all, which is correct: it does nothing for them yet.
  */
 export function canMisfile(state: RunState): boolean {
   return (
-    state.demoted &&
-    state.strikes < 3 &&
+    hasRungToClimb(state) &&
     state.meters.morale >= 2 &&
     state.recoveryGate === 0
   );
@@ -103,7 +115,6 @@ export function applyRecovery(state: RunState, kind: RecoveryKind): RunState {
   return {
     ...state,
     title: climbed,
-    demoted: false,
     meters: { ...state.meters, career: 5, morale },
     probation: 3,
     recoveryGate: 2,
@@ -142,9 +153,12 @@ export function rollLetterhead(state: RunState, rng: Rng, eligible: boolean): bo
   return eligible && state.recoveryGate === 0 && rng.chance(0.15);
 }
 
-/** Goblin advocacy: high morale AND a day with nothing on it. */
+/** Goblin advocacy: high morale, a day with nothing on it, and a rung to climb. */
 export function advocacyEligible(state: RunState, quietDay: boolean): boolean {
-  return quietDay && state.meters.morale >= 9 && state.recoveryGate === 0 && state.demoted;
+  // Same rung gate as the catch-all. Advocacy costs no morale, so without this a player
+  // at full title banks a "promotion" that goes nowhere — and still eats the probation
+  // it triggers. See DESIGN.md 7.4.
+  return quietDay && state.meters.morale >= 9 && state.recoveryGate === 0 && hasRungToClimb(state);
 }
 
 /**
