@@ -42,28 +42,99 @@ body {
   padding: 4rem 1.5rem 6rem;
 }
 
-/* --- the three numbers. This is the entire status UI. --- */
+/*
+ * The status readout is a FORM, not a HUD.
+ *
+ * The fortress runs on paperwork, so the meters are presented the way a manager would
+ * actually read them: a named quantity, a scale out of ten, and the change annotated on
+ * the line. That is also what makes the fiction legible — a line saying "you're at four"
+ * is worthless unless the player can see four out of ten and know which quantity.
+ *
+ * Still no icons, no badges, no colour coding. Deadpan.
+ */
 
 .meters {
-  display: flex;
-  gap: 1.75rem;
-  padding-bottom: 0.9rem;
-  border-bottom: 1px solid var(--rule);
   margin-bottom: 2.5rem;
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.meters-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 1rem;
   font-size: 0.78rem;
-  letter-spacing: 0.04em;
-  color: var(--ink-soft);
-  flex-wrap: wrap;
-}
-
-.meters strong {
-  color: var(--ink);
-  font-weight: 600;
-}
-
-.meters .title {
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+}
+
+.meters-head .title {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* The strike count. Invisible to the player until now, which was a real gap: you can be
+   demoted twice without ever being told how close the Mines are. */
+.meters-head .strikes {
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.meters-head .strikes.at-risk {
+  color: var(--ink);
+}
+
+.meter {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.22rem 0;
+  font-size: 0.8rem;
+}
+
+.meter-label {
+  flex: 1 1 auto;
+  color: var(--ink-soft);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.meter-value {
+  flex: 0 0 1.4rem;
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+/* The scale. Ten cells, like boxes on a form, not a health bar. Without it a number
+   has no magnitude — "at four" means nothing to a player who cannot see out of ten. */
+.meter-scale {
+  display: flex;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+.meter-cell {
+  width: 9px;
+  height: 13px;
+  border: 1px solid var(--rule);
+}
+
+.meter-cell.filled {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+/* The change, annotated on the line like a note in a margin. */
+.meter-delta {
+  flex: 0 0 2.6rem;
+  text-align: right;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
 }
 
 .day-heading {

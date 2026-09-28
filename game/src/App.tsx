@@ -39,11 +39,15 @@ export default function App() {
   const [run, setRun] = useState<RunState>(() => loadRun() ?? newRun());
   // Set once a choice is made, so the resolution and verdict show before choices return.
   const [pending, setPending] = useState<Choice | null>(null);
+  // The meters as they stood before the last change, so the readout can annotate the
+  // delta. This is what makes "you're at four" legible: the player watched it go 8 -> 4.
+  const [previous, setPrevious] = useState<RunState | null>(null);
 
   useEffect(() => saveRun(run), [run]);
 
   const choose = useCallback((choice: Choice) => {
     setRun((prev) => {
+      setPrevious(prev);
       const beat = BEATS[prev.sceneIndex];
       let next: RunState = { ...prev, meters: applyDeltas(prev.meters, choice.deltas ?? {}) };
 
@@ -94,7 +98,7 @@ export default function App() {
   if (over) {
     return (
       <>
-        <Meters run={run} />
+        <Meters run={run} previous={previous} />
         <div className="ending">
           <p className="day-heading">
             {over === "MINES" ? "TRANSFERRED TO THE MINES" : "SCHEDULED INCURSION — DID NOT OCCUR"}
@@ -121,7 +125,7 @@ export default function App() {
   if (!beat) {
     return (
       <>
-        <Meters run={run} />
+        <Meters run={run} previous={previous} />
         <div className="ending">
           <p className="day-heading">FORM 7B — CLOSED</p>
           <div className="body">
@@ -164,7 +168,7 @@ export default function App() {
 
   return (
     <>
-      <Meters run={run} />
+      <Meters run={run} previous={previous} />
 
       {!pending && (
         <>
@@ -223,19 +227,56 @@ export default function App() {
   );
 }
 
-function Meters({ run }: { run: RunState }) {
+/**
+ * The three quantities, as a manager would read them off a form.
+ *
+ * Named, scaled out of ten, and annotated with the change since the last beat. This was a
+ * playtest fix: the original flat readout ("PATIENCE 4  CAREER 4  MORALE 5") gave the
+ * player no scale and no way to tell which number a line of dialogue referred to. A goblin
+ * saying "you're at four" was ambiguous because *both* patience and career were 4.
+ *
+ * Deliberately not a game HUD: no icons, no colour, no arrows. Boxes on a form.
+ */
+const METER_ROWS: Array<{ key: keyof RunState["meters"]; label: string }> = [
+  { key: "patience", label: "The Dark Lord's Patience" },
+  { key: "career", label: "Your Position" },
+  { key: "morale", label: "Goblin Morale" },
+];
+
+const SCALE = 10;
+
+function Meters({ run, previous }: { run: RunState; previous: RunState | null }) {
+  const strikesLabel =
+    run.strikes === 0
+      ? "No demotions on record"
+      : `${run.strikes} of 3 demotions${run.strikes === 2 ? " — one remaining" : ""}`;
+
   return (
     <div className="meters">
-      <span className="title">{TITLE_LABEL[run.title]}</span>
-      <span>
-        PATIENCE <strong>{run.meters.patience}</strong>
-      </span>
-      <span>
-        CAREER <strong>{run.meters.career}</strong>
-      </span>
-      <span>
-        MORALE <strong>{run.meters.morale}</strong>
-      </span>
+      <div className="meters-head">
+        <span className="title">{TITLE_LABEL[run.title]}</span>
+        <span className={run.strikes >= 2 ? "strikes at-risk" : "strikes"}>{strikesLabel}</span>
+      </div>
+
+      {METER_ROWS.map(({ key, label }) => {
+        const value = run.meters[key];
+        const before = previous?.meters[key];
+        const delta = before === undefined ? 0 : value - before;
+        return (
+          <div className="meter" key={key}>
+            <span className="meter-label">{label}</span>
+            <span className="meter-delta">
+              {delta === 0 ? "" : delta > 0 ? `+${delta}` : `${delta}`}
+            </span>
+            <span className="meter-value">{value}</span>
+            <span className="meter-scale" aria-hidden="true">
+              {Array.from({ length: SCALE }, (_, i) => (
+                <span key={i} className={i < value ? "meter-cell filled" : "meter-cell"} />
+              ))}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }

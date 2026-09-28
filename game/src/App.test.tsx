@@ -15,12 +15,19 @@ describe("rendering", () => {
     expect(renderToStaticMarkup(createElement(App)).length).toBeGreaterThan(0);
   });
 
-  it("shows the three meters and nothing else in the status bar", () => {
+  it("names all three quantities, so a line of dialogue can refer to one", () => {
+    // Playtest fix: "you're at four" was ambiguous because both patience and career were 4,
+    // and the labels were bare words with no scale. The readout now names each quantity.
     const html = renderToStaticMarkup(createElement(App));
-    expect(html).toContain("PATIENCE");
-    expect(html).toContain("CAREER");
-    expect(html).toContain("MORALE");
-    expect(html).toContain("Regional Manager");
+    expect(html).toContain("The Dark Lord&#x27;s Patience");
+    expect(html).toContain("Your Position");
+    expect(html).toContain("Goblin Morale");
+  });
+
+  it("shows a ten-cell scale and a demotion count", () => {
+    const html = renderToStaticMarkup(createElement(App));
+    expect(html.match(/meter-cell/g) ?? []).toHaveLength(30); // 3 meters x 10 cells
+    expect(html).toContain("No demotions on record");
   });
 
   it("offers exactly four filing choices on the Chosen One scene", () => {

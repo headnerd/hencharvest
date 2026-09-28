@@ -47,6 +47,25 @@ If either fails, fix the balance *before* shipping. Cloudflare's free tier makes
 free, so there is no cost to waiting — and a public URL makes "did you check that?" a much
 worse question.
 
+### Playtest findings (in progress)
+
+Read these before touching the balance. These came from playing, not from tests.
+
+**1. The status readout was illegible, and it broke a line of dialogue.** *(fixed)*
+The meters rendered as `PATIENCE 4  CAREER 4  MORALE 5` — bare words, no scale, no change
+indicator. A goblin said "You're at four" and the player could not tell what the 4 referred
+to, because **both patience and career were 4 at that moment.** The number had no magnitude
+either, so 4 read as a digit rather than a level.
+
+The readout is now a form: each quantity named, drawn as ten cells, with the change since
+the last beat annotated on the line, and a demotion count in the header (previously the
+player could be demoted twice without ever being told how close the Mines were). Dialogue
+can now refer to "your position" unambiguously, and the player watches 8 → 4 happen.
+
+**Standing lesson:** any line of dialogue that names a number must be checkable against the
+readout. If a number is not legible on screen, the line is not writing. Add the number to
+`METER_ROWS` and let the test assert the scale exists.
+
 ## Deploying
 
 Cloudflare Pages, once the above is signed off. Static SPA, no config file:
