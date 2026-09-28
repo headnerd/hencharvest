@@ -1,6 +1,8 @@
 # Hencharvest: Middle Management At The Fortress
 
-**Design doc — text prototype pass. No engine committed.**
+**Design doc.** The design and the build are reconciled: where the engine corrected this
+document, the correction is written here rather than left in the commit that made it. Where
+this document is still ahead of the build, it says so. Read in the order `README.md` gives.
 
 ---
 

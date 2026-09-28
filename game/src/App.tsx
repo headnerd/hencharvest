@@ -85,15 +85,29 @@ export default function App() {
     setPending(null);
   }, []);
 
-  /** Share the run as text. No backend — a run is a seed and a log. */
-  const share = useCallback(() => {
-    void navigator.clipboard?.writeText(exportRun(run));
+  /**
+   * Sharing is a keypress, not a link.
+   *
+   * The footer used to carry a "Copy run" button on every screen. It was the only control
+   * in the game that was not part of the fiction — a utility affordance sitting under a
+   * document that is supposed to be a filing, on a game whose whole voice is that the
+   * interface is the filing system. CONTENT.md 5d: if the player can point at a screen and
+   * say "this is where the game told me", it was told too clearly.
+   *
+   * The key is a playtest affordance, not a feature. See game/README.md.
+   */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "c" || e.metaKey || e.ctrlKey || e.altKey) return;
+      void navigator.clipboard?.writeText(exportRun(run));
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [run]);
 
   const atEnd = !BEATS[run.sceneIndex];
   const over = isRunOver(run, atEnd);
   const beat = BEATS[run.sceneIndex];
-
 
   if (over) {
     return (
@@ -218,10 +232,7 @@ export default function App() {
 
       <p className="footer-note">
         Run {run.seed} · Week {beat.week.week} of 6 · Beat {run.sceneIndex + 1} of{" "}
-        {TOTAL_SCENES} ·{" "}
-        <button className="link" onClick={share}>
-          Copy run
-        </button>
+        {TOTAL_SCENES}
       </p>
     </>
   );
