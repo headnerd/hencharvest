@@ -28,8 +28,6 @@ export type Strikes = 0 | 1 | 2 | 3;
 export interface RunState {
   /** Seed for the deterministic RNG. Every run replays identically from its seed. */
   seed: number;
-  /** Which week of the run we are in, 1-indexed. */
-  week: number;
   /** Day counter within the run. Advances once per day and is the strike-guard key. */
   day: number;
   /** Index into the week's scene list. */

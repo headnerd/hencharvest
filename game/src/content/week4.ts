@@ -33,22 +33,23 @@ export const week4: Week = {
             {
               id: "w4-file-scheduling",
               label: "1. SCHEDULING CONFLICT",
-              note: "He is here on a Tuesday. Tuesdays are a standing conflict.",
+              note: "He is here. He is, was, and will be on a Tuesday. A standing conflict remains standing.",
               correct: true,
               verdict: "ACCEPTED",
               deltas: { patience: -1, career: 1 },
               resolution: [
                 "The notice went out. It is the fifth. He takes it without reading it, which you note in the file, because the file has a field for whether the party acknowledged receipt and this is the first time that field has been useful.",
+                "He has put last week's notice in the tray with this week's, and the tray now has a filing order, and the filing order is newer than the notices.",
               ],
             },
             {
               id: "w4-file-safety",
               label: "2. SAFETY COMPLIANCE",
-              note: "He is near the pit trap. The trap cannot consent to this proximity.",
+              note: "He is near the pit trap. The claimant now has a lane.",
               verdict: "ACCEPTED",
-              deltas: { patience: 1, morale: -1 },
+              deltas: { career: 1, morale: -1 },
               resolution: [
-                "Filed against the hazard assessment. This is the ninth filing of its kind and the assessment now has more citations than recommendations, and has not been amended on the strength of any of them.",
+                "Filed against the hazard assessment. The claimant's lane is marked, the lane has a schedule, the schedule is a Tuesday, and the schedule is now the only other standing order in the fortress besides yours.",
               ],
             },
             {
@@ -56,9 +57,9 @@ export const week4: Week = {
               label: "3. DEPRECATION NOTICE",
               note: "The fact that he carries nothing is, briefly, the most deprecable thing about him.",
               verdict: "REJECTED",
-              deltas: { career: -1 },
+              deltas: { patience: -1, morale: -1 },
               resolution: [
-                "You have attempted to deprecate a man's equipment where the equipment is nothing. The rejection is automatic, and the automation is not subtle, and the reason it is automatic is that this filing has been rejected eleven times.",
+                "You have attempted to deprecate a man's equipment where the equipment is nothing. The rejection is automatic, and the automation has a name, and the name is being filed, and eleven rejections have established the number.",
               ],
             },
             {
@@ -69,7 +70,7 @@ export const week4: Week = {
               deltas: { patience: -1, career: -1, morale: -1 },
               recovery: "MISFILE",
               resolution: [
-                "Filed under Other. The queue is at four hundred and one.",
+                "Filed under Other. The queue is at four hundred and one, and the claimant is in it, and the claimant is at the front, and the queue is at four hundred and one, and these are all the same sentence.",
                 "The Chosen One is still in the building. He has been in the building for the entire duration of this filing.",
               ],
             },
@@ -144,10 +145,28 @@ export const week4: Week = {
           choices: [
             {
               id: "w4-memo-continue",
-              label: "Continue",
+              label: "1. Update the letterhead",
               resolution: [
                 "You update the letterhead. The letterhead was not the problem and the letterhead was never going to be the problem, and updating it takes four minutes, and four minutes is what you have.",
                 "The Deputy signs the hazard assessment at 16:40. The assessment was complete before the Deputy arrived. The Deputy has nonetheless improved one sentence, and the improvement has been accepted, because there is no field for refusing an improvement.",
+              ],
+            },
+            {
+              id: "w4-memo-reply",
+              label: "2. Reply asking who signed",
+              deltas: { patience: -2 },
+              resolution: [
+                "The reply comes back unsigned. It has one line: the Deputy signed it, and the Deputy is the one who signed it. The line is now in the record, and the record is where lines go to be true.",
+                "Goblin 4 has been copied. Copied people in this building get to watch.",
+              ],
+            },
+            {
+              id: "w4-memo-file",
+              label: "3. File the memo under the letterhead",
+              deltas: { career: 1, morale: -1 },
+              resolution: [
+                "Filed. The Deputy receives a copy and signs it, and the copy is a second Deputy, and two Deputies are standing in the file where you used to stand.",
+                "The morale has adjusted its expectations of your filing accordingly.",
               ],
             },
           ],

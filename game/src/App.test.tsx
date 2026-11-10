@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import App from "./App";
@@ -10,9 +10,39 @@ import { week1 } from "./content/week1";
  * No jsdom needed — a server render tells us whether the component tree is valid.
  */
 
+/** A returning player (intro seen), so tests exercise the game screen. */
+beforeEach(() => {
+  const store = new Map<string, string>([["hencharvest.seen", "1"]]);
+  globalThis.localStorage = {
+    getItem: (k: string) => store.get(k) ?? null,
+    setItem: (k: string, v: string) => void store.set(k, v),
+    removeItem: (k: string) => void store.delete(k),
+    clear: () => store.clear(),
+    key: () => null,
+    length: 0,
+  } as Storage;
+});
+
 describe("rendering", () => {
   it("renders without throwing", () => {
     expect(renderToStaticMarkup(createElement(App)).length).toBeGreaterThan(0);
+  });
+
+  it("shows the appointment memo to a first-time visitor", () => {
+    // Fresh visitor: intro not seen, so the memo renders instead of the run.
+    const store = new Map<string, string>();
+    globalThis.localStorage = {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => void store.set(k, v),
+      removeItem: (k: string) => void store.delete(k),
+      clear: () => store.clear(),
+      key: () => null,
+      length: 0,
+    } as Storage;
+    const html = renderToStaticMarkup(createElement(App));
+    expect(html).toContain("HENCHARVEST");
+    expect(html).toContain("You will not fight him. You will file him.");
+    expect(html).toContain("Begin");
   });
 
   it("names all three quantities, so a line of dialogue can refer to one", () => {
@@ -28,6 +58,13 @@ describe("rendering", () => {
     const html = renderToStaticMarkup(createElement(App));
     expect(html.match(/meter-cell/g) ?? []).toHaveLength(30); // 3 meters x 10 cells
     expect(html).toContain("No demotions on record");
+  });
+
+  it("has an h1 and screen-reader meter text, since the scale is visual only", () => {
+    const html = renderToStaticMarkup(createElement(App));
+    expect(html).toContain("<h1");
+    expect(html).toContain("of 10");
+    expect(html).toContain('aria-label="Status"');
   });
 
   it("offers exactly four filing choices on the Chosen One scene", () => {

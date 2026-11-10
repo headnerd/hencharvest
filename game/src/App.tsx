@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Choice, RunState, Verdict } from "./engine/types";
 import { BEATS, TOTAL_SCENES } from "./content";
+import { INTRO } from "./content/intro";
 import {
   advocacyEligible,
   applyDeltas,
@@ -12,7 +13,7 @@ import {
   tickDay,
 } from "./engine/rules";
 import { Rng } from "./engine/rng";
-import { newRun, loadRun, saveRun, clearRun, exportRun } from "./engine/persist";
+import { newRun, loadRun, saveRun, clearRun, exportRun, hasSeenIntro, markIntroSeen } from "./engine/persist";
 
 /**
  * The whole game loop. Reads a beat, shows it, takes a choice, applies the deltas, prints
@@ -56,6 +57,14 @@ export default function App() {
   // The meters as they stood before the last change, so the readout can annotate the
   // delta. This is what makes "you're at four" legible: the player watched it go 8 -> 4.
   const [previous, setPrevious] = useState<RunState | null>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const continueRef = useRef<HTMLButtonElement>(null);
+  const isFirstRender = useRef(true);
+  // The appointment memo. Visible only on a genuine first visit, and again
+  // after "Begin again" (a fresh appointment, not a menu return). Returning
+  // players with a save skip it entirely.
+  const [showIntro, setShowIntro] = useState<boolean>(() => !hasSeenIntro());
+  const introRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => saveRun(run), [run]);
 
@@ -63,7 +72,18 @@ export default function App() {
     setRun((prev) => {
       setPrevious(prev);
       const beat = BEATS[prev.sceneIndex];
-      let next: RunState = { ...prev, meters: applyDeltas(prev.meters, choice.deltas ?? {}) };
+      let next: RunState = {
+        ...prev,
+        meters: applyDeltas(prev.meters, choice.deltas ?? {}),
+        transcript: [
+          ...prev.transcript,
+          {
+            day: prev.day,
+            kind: choice.verdict ? "verdict" : "narration",
+            text: beat ? `${beat.scene.title} — ${choice.label}` : choice.label,
+          },
+        ],
+      };
 
       // The misfiling. Only fires when demoted — see canMisfile.
       if (choice.recovery === "MISFILE" && canMisfile(prev)) {
@@ -115,6 +135,13 @@ export default function App() {
     clearRun();
     setRun(newRun());
     setPending(null);
+    setPrevious(null);
+    setShowIntro(true);
+  }, []);
+
+  const begin = useCallback(() => {
+    markIntroSeen();
+    setShowIntro(false);
   }, []);
 
   /**
@@ -141,9 +168,45 @@ export default function App() {
   const over = isRunOver(run, atEnd);
   const beat = BEATS[run.sceneIndex];
 
+  // Keep keyboard and screen-reader users oriented: the memo focuses its
+  // title, a new beat focuses its heading, a resolution focuses Continue.
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      if (showIntro) introRef.current?.focus();
+      return;
+    }
+    if (showIntro) {
+      introRef.current?.focus();
+      return;
+    }
+    if (pending || over) continueRef.current?.focus();
+    else (headingRef.current ?? continueRef.current)?.focus();
+  }, [run, pending, over, showIntro]);
+
+  if (showIntro) {
+    return (
+      <>
+        <h1 className="intro-title" tabIndex={-1} ref={introRef}>{INTRO.title}</h1>
+        <p className="intro-sub">{INTRO.subtitle}</p>
+        <p className="day-heading">{INTRO.heading}</p>
+        <div className="body">
+          {INTRO.memo.map((line, i) => (
+            <p key={i}>{line}</p>
+          ))}
+          <p className="intro-signoff">{INTRO.signoff}</p>
+        </div>
+        <button className="continue" onClick={begin}>
+          {INTRO.beginLabel}
+        </button>
+      </>
+    );
+  }
+
   if (over) {
     return (
       <>
+        <h1 className="sr-only">Hencharvest: Middle Management At The Fortress</h1>
         <Meters run={run} previous={previous} />
         <div className="ending">
           <p className="day-heading">
@@ -160,7 +223,7 @@ export default function App() {
             Follow-up required: No. There is no follow-up. The trap is compliant.
             <span className="reason">Filing closed.</span>
           </div>
-          <button className="continue" onClick={restart}>
+          <button className="continue" ref={continueRef} onClick={restart}>
             Begin again
           </button>
         </div>
@@ -171,6 +234,7 @@ export default function App() {
   if (!beat) {
     return (
       <>
+        <h1 className="sr-only">Hencharvest: Middle Management At The Fortress</h1>
         <Meters run={run} previous={previous} />
         <div className="ending">
           <p className="day-heading">FORM 7B — CLOSED</p>
@@ -202,7 +266,7 @@ export default function App() {
               available to be responsible. Filing closed.
             </span>
           </div>
-          <button className="continue" onClick={restart}>
+          <button className="continue" ref={continueRef} onClick={restart}>
             Begin again
           </button>
         </div>
@@ -214,12 +278,13 @@ export default function App() {
 
   return (
     <>
+      <h1 className="sr-only">Hencharvest: Middle Management At The Fortress</h1>
       <Meters run={run} previous={previous} />
 
       {!pending && (
         <>
           <p className="day-heading">{beat.day.heading}</p>
-          <h2 className="scene-title">{scene.title}</h2>
+          <h2 className="scene-title" tabIndex={-1} ref={headingRef}>{scene.title}</h2>
           <div className="body">
             {scene.body.map((line, i) => (
               <p key={i}>{line}</p>
@@ -248,7 +313,7 @@ export default function App() {
       )}
 
       {pending ? (
-        <button className="continue" onClick={advance}>
+        <button className="continue" ref={continueRef} onClick={advance}>
           Continue
         </button>
       ) : (
@@ -295,7 +360,7 @@ function Meters({ run, previous }: { run: RunState; previous: RunState | null })
       : `${run.strikes} of 3 demotions${run.strikes === 2 ? " — one remaining" : ""}`;
 
   return (
-    <div className="meters">
+    <div className="meters" role="region" aria-label="Status">
       <div className="meters-head">
         <span className="title">{TITLE_LABEL[run.title]}</span>
         <span className={run.strikes >= 2 ? "strikes at-risk" : "strikes"}>{strikesLabel}</span>
@@ -308,6 +373,9 @@ function Meters({ run, previous }: { run: RunState; previous: RunState | null })
         return (
           <div className="meter" key={key}>
             <span className="meter-label">{label}</span>
+            <span className="sr-only">
+              {label}: {value} of 10{delta !== 0 ? ` (${delta > 0 ? "+" : ""}${delta} since last filing)` : ""}
+            </span>
             <span className="meter-delta">
               {delta === 0 ? "" : delta > 0 ? `+${delta}` : `${delta}`}
             </span>

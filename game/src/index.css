@@ -27,6 +27,19 @@
   box-sizing: border-box;
 }
 
+/* Visually hidden, screen-reader present: the h1 and the meters' text values. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -151,6 +164,26 @@ body {
   text-transform: uppercase;
   margin: 0 0 1.25rem;
   font-weight: 600;
+}
+
+/* The cold open. The game title is the only display type; the memo does the rest. */
+.intro-title {
+  font-size: 1.75rem;
+  letter-spacing: 0.12em;
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+}
+
+.intro-sub {
+  font-size: 0.85rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 2rem;
+}
+
+.intro-signoff {
+  font-style: italic;
 }
 
 /* World lines. A blockquote because they are the building talking. */

@@ -110,10 +110,10 @@ export const week2: Week = {
             {
               id: "w2-memo-defer",
               label: "Leave it for later",
-              deltas: { patience: -2 },
+              deltas: { patience: -4 },
               resolution: [
-                "You leave it for later. Later arrives, as it does, and the memo is on your desk and has been on your desk for the entire intervening period, and it has not developed a disposition in that time.",
-                "The patience cost is lower. It is not zero. Nothing about this is free, and the memo is not going to expire, because it is not a ticket, and that is the problem with memos.",
+                "You leave it for later. Later arrives on schedule, which is how you know it is a weekday. The memo is on your desk, and at standup Goblin 4 reads it aloud in your own voice, because the voice is the only thing here that matches the signature, and the room receives it as a performance.",
+                "The patience cost is the same. It was always going to be the same. Nobody made a note of it, because the noter was reading your memo aloud.",
               ],
             },
           ],
@@ -122,11 +122,11 @@ export const week2: Week = {
           id: "w2-memo-consequence",
           title: "STANDUP, THURSDAY",
           noVerdict: true,
-          body: [],
+          body: ["Goblin 4 has finished reading your memo aloud. The standup is still standing."],
           choices: [
             {
               id: "w2-memo-after",
-              label: "Continue",
+              label: "1. Let them continue",
               resolution: [
                 "Goblin 4: You're at four.",
                 "You: I know what I'm at.",
@@ -134,6 +134,29 @@ export const week2: Week = {
                 "Goblin 1: It's not a defence, it's a habit. You did it at ten as well.",
                 "Goblin 4: You did. Nothing happened at ten. That's the part I keep drawing attention to.",
                 "Goblin 1: I'm drawing attention to it because you filed a form about it. At four. Not at ten.",
+              ],
+            },
+            {
+              id: "w2-memo-after-promise",
+              label: "2. Promise an update by Friday",
+              deltas: { morale: -1, patience: -1 },
+              resolution: [
+                "Goblin 1: An update about what.",
+                "You: About the — about the trap.",
+                "Goblin 4: Friday is tomorrow.",
+                "You: I can do tomorrow.",
+                "Goblin 1: We have already moved it to Wednesday. You may want to know that ahead of Friday, since you are the only person in the building being informed of it.",
+                "The promise has a timeline now, and the timeline has an owner, and the owner is the meeting.",
+              ],
+            },
+            {
+              id: "w2-memo-after-ask",
+              label: "3. Ask who read the memo aloud",
+              deltas: { career: -1, patience: 1 },
+              resolution: [
+                "Goblin 1: Goblin 4 read it aloud.",
+                "Goblin 4: I did. In your voice. It was the only voice in the building that matched the signature, and the room received it as a performance.",
+                "Goblin 1: Filing it does not return it, and the form has been filed, and the number is not going up.",
               ],
             },
           ],

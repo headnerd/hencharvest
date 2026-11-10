@@ -45,7 +45,6 @@ function isUsable(parsed: unknown): parsed is RunState {
 export function newRun(seed = makeSeed()): RunState {
   return {
     seed,
-    week: 1,
     day: 0,
     sceneIndex: 0,
     meters: { patience: 7, career: 6, morale: 6 },
@@ -82,6 +81,32 @@ export function loadRun(): RunState | null {
 export function clearRun(): void {
   try {
     localStorage.removeItem(KEY);
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * Whether the player has begun past the first screen.
+ *
+ * Separate from the run save: the game autosaves on load, so a visitor who closed
+ * before their first filing has a "save" at beat one — and would otherwise never be
+ * shown the appointment memo again. A seen flag that only `Begin` sets is what keeps
+ * the cold open to a genuine first visit.
+ */
+const SEEN_KEY = "hencharvest.seen";
+
+export function hasSeenIntro(): boolean {
+  try {
+    return localStorage.getItem(SEEN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function markIntroSeen(): void {
+  try {
+    localStorage.setItem(SEEN_KEY, "1");
   } catch {
     // ignore
   }

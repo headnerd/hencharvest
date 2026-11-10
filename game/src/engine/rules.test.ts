@@ -12,7 +12,7 @@ import {
   tickDay,
 } from "./rules";
 import { Rng } from "./rng";
-import { loadRun, newRun, saveRun } from "./persist";
+import { exportRun, hasSeenIntro, loadRun, markIntroSeen, newRun, saveRun } from "./persist";
 
 /**
  * BRANCHING.md is a spec, not a document. The canonical run's Career column
@@ -23,7 +23,6 @@ import { loadRun, newRun, saveRun } from "./persist";
 function run(overrides: Partial<RunState> = {}): RunState {
   return {
     seed: 1,
-    week: 1,
     day: 0,
     sceneIndex: 0,
     meters: { patience: 7, career: 6, morale: 6 },
@@ -332,7 +331,6 @@ describe("persistence", () => {
   // could never be demoted and the game was unfinishable. Validate rather than migrate.
   const staleWeekOne = {
     seed: 42,
-    week: 1,
     sceneIndex: 3,
     meters: { patience: 5, career: 6, morale: 6 },
     title: "REGIONAL_MANAGER",
@@ -378,6 +376,30 @@ describe("persistence", () => {
     expect(loaded?.day).toBe(0);
     expect(loaded?.lastStrikeDay).toBe(-1);
     expect(loaded?.meters).toEqual(run.meters);
+  });
+
+  it("exports a run log that includes transcript entries", () => {
+    const run = newRun(99);
+    run.transcript = [{ day: 0, kind: "verdict", text: "STANDUP — File it as written" }];
+    const out = exportRun(run);
+    expect(out).toContain("run 99");
+    expect(out).toContain("STANDUP");
+  });
+
+  it("starts unseen and records the intro once begun", () => {
+    const store = new Map<string, string>();
+    globalThis.localStorage = {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => void store.set(k, v),
+      removeItem: (k: string) => void store.delete(k),
+      clear: () => store.clear(),
+      key: () => null,
+      length: 0,
+    } as Storage;
+
+    expect(hasSeenIntro()).toBe(false);
+    markIntroSeen();
+    expect(hasSeenIntro()).toBe(true);
   });
 });
 

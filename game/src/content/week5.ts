@@ -42,11 +42,11 @@ export const week5: Week = {
             {
               id: "w5-file-safety",
               label: "2. SAFETY COMPLIANCE",
-              note: "He is near the pit trap.",
+              note: "He is near the pit trap. This is true and insufficient.",
               verdict: "ACCEPTED",
               deltas: { patience: 1, morale: -1 },
               resolution: [
-                "Filed. Eleventh of its kind. The assessment has not been amended and the man has not been amended and the pit trap has not been amended, and the three of them are entirely consistent with each other.",
+                "Filed. Eleventh of its kind. The assessment has not been amended and the man has not been amended and the pit trap has not been amended, and the three of them are entirely consistent with each other. The claimant's lane now appears in the assessment as a recommendation, which is the first time the word has been used in it.",
               ],
             },
             {
@@ -56,7 +56,7 @@ export const week5: Week = {
               verdict: "REJECTED",
               deltas: { career: -1 },
               resolution: [
-                "You have checked. The cabinet is not deprecated. The cabinet is a filing cabinet, and it is also the thing at the bottom, and you have apparently established that these are the same cabinet, which is the first genuinely useful thing anyone in this building has found out in months.",
+                "You have checked. The cabinet is not deprecated. The cabinet is a filing cabinet, and it is also the thing at the bottom, and you have apparently established that these are the same cabinet, which is the first genuinely useful thing anyone in this building has found out in months. The notice was accepted by the cabinet, which is a receiving tray with ambitions, and is presumably in the queue.",
               ],
             },
             {
@@ -77,16 +77,34 @@ export const week5: Week = {
           id: "w5-standup",
           title: "STANDUP, TUESDAY EVENING",
           noVerdict: true,
-          body: [],
+          body: ["Goblin 4 has been talking about the queue for some time. The standup is still standing."],
           choices: [
             {
               id: "w5-standup-continue",
-              label: "Continue",
+              label: "1. Let them talk",
               resolution: [
                 "Goblin 1: The queue's at four hundred and two.",
                 "Goblin 4: Is it moving?",
                 "Goblin 1: It's a queue.",
                 "Goblin 4: It used to be a filing system. Nobody wrote that down. It's been a queue since before either of us.",
+              ],
+            },
+            {
+              id: "w5-standup-legal",
+              label: "2. Ask Legal to unblock the queue",
+              deltas: { patience: -1, career: -1 },
+              resolution: [
+                "Legal replies with a message from the door. The message is about the door. The queue has advanced by deterioration to four hundred and three, which is how queues go when they find out they are queues.",
+              ],
+            },
+            {
+              id: "w5-standup-address",
+              label: "3. Tell them the queue is being addressed",
+              deltas: { morale: -1 },
+              resolution: [
+                "Goblin 1: Addressed by whom.",
+                "Goblin 4: Also, where is the address. We can deliver it.",
+                "The silence has a shape. It is the shape of the queue, but the queue does not move.",
               ],
             },
           ],
@@ -109,7 +127,7 @@ export const week5: Week = {
           choices: [
             {
               id: "w5-quiet-continue",
-              label: "Continue",
+              label: "1. Stay and listen",
               deltas: { morale: 3 },
               resolution: [
                 "Goblin 1: You filed him correctly again.",
@@ -119,6 +137,23 @@ export const week5: Week = {
                 "Goblin 1: It's a rate. It isn't a result. Those are different columns and we have only ever populated one of them.",
                 "Goblin 4: Which one.",
                 "Goblin 1: Not on a Thursday. There is no form for it on a Thursday.",
+              ],
+            },
+            {
+              id: "w5-quiet-ask",
+              label: "2. Ask what a good rate is",
+              deltas: { morale: 2, patience: -1 },
+              resolution: [
+                "Goblin 1: A rate is how often. A result is what happened. The fortress has only ever populated the how-often column, and the column is full, and it is full of Tuesdays.",
+                "Goblin 4: It is a good column. It is a fully good column. It is the only one they gave us to fill in.",
+              ],
+            },
+            {
+              id: "w5-quiet-schedule",
+              label: "3. Schedule next week's standup",
+              deltas: { morale: 1, career: 1 },
+              resolution: [
+                "The standup is scheduled, and the goblins treat a scheduled meeting as progress, because progress is the thing that can be scheduled, and it is also the thing that cannot.",
               ],
             },
           ],

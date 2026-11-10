@@ -100,7 +100,7 @@ export const week6: Week = {
               verdict: "INSUFFICIENT",
               deltas: { patience: 1, morale: -1 },
               resolution: [
-                "Filed against the hazard assessment. The assessment does not have a field for what he actually wrote, so it has recorded that he was near a hazard, which he was, and which was not the subject.",
+                "Filed against the hazard assessment. The assessment does not have a field for what he actually wrote, so it has recorded that he was near a hazard, which he was, and which was not the subject. The claimant's lane is reissued in the claimant's name, and for the first time the file contains a person and the person contains no category, and they are standing in different queues.",
               ],
             },
             {
@@ -110,7 +110,7 @@ export const week6: Week = {
               verdict: "REJECTED",
               deltas: { career: -1 },
               resolution: [
-                "You have filed this before and the tray is still the tray. The notice is returned with the tray attached to it, which is not how returns work, and which nobody has corrected.",
+                "You have filed this before and the tray is still the tray. The notice is returned with the tray attached to it, which is not how returns work, and which nobody has corrected. The queue has started notifying the tray when it is due; the tray attends early, which is the most punctual thing in the building, and the building has noticed.",
               ],
             },
             {
@@ -138,11 +138,29 @@ export const week6: Week = {
           choices: [
             {
               id: "w6-memo-continue",
-              label: "Continue",
+              label: "1. Consider it closed",
               resolution: [
                 "There is no signature at the bottom. There has never needed to be one. The letterhead is a courtesy.",
                 "Your title has been updated. The effective date is today. No meeting has been scheduled and none is required.",
                 "The filing quality concern raised on the 14th is considered closed.",
+              ],
+            },
+            {
+              id: "w6-memo-reply",
+              label: "2. Reply 'Understood'",
+              deltas: { patience: -1 },
+              resolution: [
+                "The reply is sent. A meeting invite arrives for the 14th. It is the only response in the fortress that is signed, and the signature is the scheduling clerk, and the clerk is a door, and the door is also a demon.",
+                "Your title has been updated. The effective date is today. No meeting has been scheduled and none is required.",
+              ],
+            },
+            {
+              id: "w6-memo-query",
+              label: "3. Query the letterhead",
+              deltas: { career: -1, patience: -1 },
+              resolution: [
+                "The query gets a number. The number is 14. The filing quality concern raised on the 14th is now raised on the 14th again, because the number is the same number, and the concern is considered closed.",
+                "Your title has been updated. The effective date is today. No meeting has been scheduled and none is required.",
               ],
             },
           ],
@@ -151,17 +169,34 @@ export const week6: Week = {
           id: "w6-standup",
           title: "STANDUP, WEDNESDAY",
           noVerdict: true,
-          body: [],
+          body: ["Goblin 4 has been watching you since the memo. The standup is still standing."],
           choices: [
             {
               id: "w6-standup-continue",
-              label: "Continue",
+              label: "1. Say nothing",
               resolution: [
                 "Goblin 4: Was something said to you?",
                 "You: About the title?",
                 "Goblin 4: About anything. You look like someone said something.",
                 "You: Nothing was said to me.",
                 "Goblin 4: Right. That's twice now, and I've been here four years.",
+              ],
+            },
+            {
+              id: "w6-standup-write",
+              label: "2. Answer in writing",
+              deltas: { patience: -1, career: 1 },
+              resolution: [
+                "Two forms are produced. The writing is accepted. The acceptance is filed, and the filing is the only part of the answer that anyone will be able to find in a month, and the month is not the point, and the point is the filing.",
+              ],
+            },
+            {
+              id: "w6-standup-deputy",
+              label: "3. Ask whether the sentence improved",
+              deltas: { morale: -1 },
+              resolution: [
+                "Goblin 1: The Deputy's sentence improved. The improvement has been accepted, because there is no field for refusing an improvement.",
+                "The standup has a record now. Records are where good sentences go when there's nowhere for them to live.",
               ],
             },
           ],

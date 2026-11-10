@@ -25,7 +25,7 @@ export const week1: Week = {
           choices: [
             {
               id: "w1-goblins-continue",
-              label: "Continue",
+              label: "1. Note it and move on",
               resolution: [
                 "Goblin 1: Morning.",
                 "Goblin 4: Morning.",
@@ -33,6 +33,26 @@ export const week1: Week = {
                 "Goblin 4: Is it the message about the message?",
                 "Goblin 1: It's the message about the door, Goblin 4.",
                 "Goblin 4: In my experience those are the same message.",
+              ],
+            },
+            {
+              id: "w1-goblins-ask",
+              label: "2. Ask what 'reconciled' reconciles",
+              deltas: { morale: -1 },
+              resolution: [
+                "Goblin 1: The count is lower because the trap got lighter.",
+                "Goblin 4: It got lighter because a spike was removed.",
+                "Goblin 1: The spike was removed because nobody is in a campaign this quarter.",
+                "Goblin 4: Correct. It is reconciled. On the record. Twice.",
+                "The number has two witnesses now and one author. The witnesses have notes.",
+              ],
+            },
+            {
+              id: "w1-goblins-file",
+              label: "3. File it as reconciled",
+              deltas: { career: 1, patience: -1 },
+              resolution: [
+                "Filed before the Chosen One arrives. The form is early, which in this building means it is already suspicious, and Legal has stamped it, and the stamp is a door, and the door has a schedule, and the schedule is Tuesday.",
               ],
             },
           ],
